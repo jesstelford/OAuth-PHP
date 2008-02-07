@@ -131,11 +131,17 @@ class OAuthStoreAnymeta extends OAuthStoreMySQL
 	{
 		parent::install();
 
+		any_db_query("ALTER TABLE oauth_consumer_registry MODIFY ocr_usa_id_ref int(11) unsigned");
+		any_db_query("ALTER TABLE oauth_consumer_token    MODIFY oct_usa_id_ref int(11) unsigned not null");
+		any_db_query("ALTER TABLE oauth_server_registry   MODIFY osr_usa_id_ref int(11) unsigned");
+		any_db_query("ALTER TABLE oauth_server_token      MODIFY ost_usa_id_ref int(11) unsigned not null");
+		any_db_query("ALTER TABLE oauth_log               MODIFY olg_usa_id_ref int(11) unsigned");
+
 		any_db_alter_add_fk('oauth_consumer_registry', 'ocr_usa_id_ref', 'any_user_auth(usa_id_ref)', 'on update cascade on delete set null');
-		any_db_alter_add_fk('oauth_consumer_token',    'oct_usa_id_ref', 'any_user_auth(usa_id_ref)', 'on update cascade on delete set cascade');
+		any_db_alter_add_fk('oauth_consumer_token',    'oct_usa_id_ref', 'any_user_auth(usa_id_ref)', 'on update cascade on delete cascade');
 		any_db_alter_add_fk('oauth_server_registry',   'osr_usa_id_ref', 'any_user_auth(usa_id_ref)', 'on update cascade on delete set null');
-		any_db_alter_add_fk('oauth_server_token',      'ost_usa_id_ref', 'any_user_auth(usa_id_ref)', 'on update cascade on delete set cascade');
-		any_db_alter_add_fk('oauth_log',               'olg_usa_id_ref', 'any_user_auth(usa_id_ref)', 'on update cascade on delete set cascade');
+		any_db_alter_add_fk('oauth_server_token',      'ost_usa_id_ref', 'any_user_auth(usa_id_ref)', 'on update cascade on delete cascade');
+		any_db_alter_add_fk('oauth_log',               'olg_usa_id_ref', 'any_user_auth(usa_id_ref)', 'on update cascade on delete cascade');
 	}
 
 	
