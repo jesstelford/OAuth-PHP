@@ -307,7 +307,7 @@ class OAuthRequester extends OAuthRequestSigner
 		}
 
 		curl_setopt($ch, CURLOPT_HTTPHEADER,	 $header);
-		curl_setopt($ch, CURLOPT_USERAGENT,		 'anyMeta/OAuth 1.0 - ($LastChangedRevision: 33435 $)');
+		curl_setopt($ch, CURLOPT_USERAGENT,		 'anyMeta/OAuth 1.0 - ($LastChangedRevision$)');
 		curl_setopt($ch, CURLOPT_URL, 			 $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_HEADER, 		 true);
