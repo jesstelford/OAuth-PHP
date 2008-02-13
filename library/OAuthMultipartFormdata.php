@@ -37,7 +37,7 @@ class OAuthMultipartFormdata
 			foreach ($params as $name => $value)
 			{
 				$body .= '--'.$boundary."\r\n";
-				$body .= 'Content-Disposition: form-data; name="'.$name.'"';
+				$body .= 'Content-Disposition: form-data; name="'.$this->encodeParameterName(rawurldecode($name)).'"';
 				$body .= "\r\n\r\n";
 				$body .= urldecode($value);
 				$body .= "\r\n";
@@ -85,7 +85,7 @@ class OAuthMultipartFormdata
 					}
 					$mime  = !empty($f['mime']) ? $f['mime'] : 'application/octet-stream';
 					$body .= '--'.$boundary."\r\n";
-					$body .= 'Content-Disposition: form-data; name="'.rawurlencode($name).'"; filename="'.rawurlencode($filename).'"'."\r\n";
+					$body .= 'Content-Disposition: form-data; name="'.$this->encodeParameterName($name).'"; filename="'.$this->encodeParameterName($filename).'"'."\r\n";
 					$body .= 'Content-Type: '.$mime;
 					$body .= "\r\n\r\n";
 					$body .= $data;
@@ -98,6 +98,20 @@ class OAuthMultipartFormdata
 
 		$headers['Content-Length'] = strlen($body);
 		return array($headers, $body);
+	}
+	
+	
+	/**
+	 * Encode a parameter's name for use in a multipart header.
+	 * For now we do a simple filter that removes some unwanted characters.
+	 * We might want to implement RFC1522 here.  See http://tools.ietf.org/html/rfc1522
+	 * 
+	 * @param string name
+	 * @return string
+	 */
+	protected function encodeParameterName ( $name )
+	{
+		return preg_replace('/[^\x20-\x7f]|"/', '-', $name);
 	}
 }
 
