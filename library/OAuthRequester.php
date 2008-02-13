@@ -3,7 +3,7 @@
 /**
  * Perform a signed OAuth request with a GET, POST, PUT or DELETE operation.
  * 
- * @version $Id: OAuthRequester.php 33435 2008-02-01 10:52:19Z marc $
+ * @version $Id$
  * @author Marc Worrell <marc@mediamatic.nl>
  * @copyright (c) 2007 Mediamatic Lab
  * @date  Nov 20, 2007 1:41:38 PM
