@@ -37,7 +37,7 @@ class OAuthMultipartFormdata
 			foreach ($params as $name => $value)
 			{
 				$body .= '--'.$boundary."\r\n";
-				$body .= 'Content-Disposition: form-data; name="'.$this->encodeParameterName(rawurldecode($name)).'"';
+				$body .= 'Content-Disposition: form-data; name="'.OAuthMultipartFormdata::encodeParameterName(rawurldecode($name)).'"';
 				$body .= "\r\n\r\n";
 				$body .= urldecode($value);
 				$body .= "\r\n";
@@ -85,7 +85,7 @@ class OAuthMultipartFormdata
 					}
 					$mime  = !empty($f['mime']) ? $f['mime'] : 'application/octet-stream';
 					$body .= '--'.$boundary."\r\n";
-					$body .= 'Content-Disposition: form-data; name="'.$this->encodeParameterName($name).'"; filename="'.$this->encodeParameterName($filename).'"'."\r\n";
+					$body .= 'Content-Disposition: form-data; name="'.OAuthMultipartFormdata::encodeParameterName($name).'"; filename="'.OAuthMultipartFormdata::encodeParameterName($filename).'"'."\r\n";
 					$body .= 'Content-Type: '.$mime;
 					$body .= "\r\n\r\n";
 					$body .= $data;
@@ -109,7 +109,7 @@ class OAuthMultipartFormdata
 	 * @param string name
 	 * @return string
 	 */
-	protected function encodeParameterName ( $name )
+	static function encodeParameterName ( $name )
 	{
 		return preg_replace('/[^\x20-\x7f]|"/', '-', $name);
 	}
