@@ -314,7 +314,10 @@ class OAuthRequester extends OAuthRequestSigner
 	
 		foreach ($opts as $k => $v)
 		{
-			curl_setopt($ch, $k, $v);
+			if ($k != CURLOPT_HTTPHEADER)
+			{
+				curl_setopt($ch, $k, $v);
+			}
 		}
 
 		$txt = curl_exec($ch);
