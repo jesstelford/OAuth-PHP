@@ -24,7 +24,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
+/* example of use:
+
+header('content-type: text/plain');
+$file = file_get_contents('../../test/discovery/xrds-magnolia.xrds');
+$xrds = xrds_parse($file);
+print_r($xrds);
+
+ */ 
 
 /**
  * Parse the xrds file in the argument.  The xrds description must have been 
@@ -272,12 +280,6 @@ function xrds_priority ( $elt )
 	}
 	return $prio;
 }
-
-
-header('content-type: text/plain');
-$file = file_get_contents('../../test/discovery/xrds-magnolia.xrds');
-$xrds = xrds_parse($file);
-print_r($xrds);
 
 
 /* vi:set ts=4 sts=4 sw=4 binary noeol: */
