@@ -526,7 +526,7 @@ class OAuthStoreMySQL
 			$where = ' WHERE (	ocr_consumer_key like \'%%%s%%\'
 						  	 OR ocr_server_uri like \'%%%s%%\'
 						  	 OR ocr_server_uri_host like \'%%%s%%\'
-						  	 OR ocr_server_uri_path like \'%%%s%%\'
+						  	 OR ocr_server_uri_path like \'%%%s%%\')
 						 AND ocr_usa_id_ref = %d
 					';
 			
