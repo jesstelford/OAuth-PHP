@@ -300,9 +300,8 @@ class OAuthRequest
 		ksort($params);
 		foreach ($params as $key => $value)
 		{
-		    // all names and values are already urlencoded
-		    if (	 $key != 'oauth_signature'
-		    	&&	($key != 'oauth_token' || strlen($value) > 0))
+		    // all names and values are already urlencoded, exclude the oauth signature
+		    if ($key != 'oauth_signature')
 		   	{
 				$normalized[] = $key.'='.$value;
 			}
