@@ -1,16 +1,14 @@
 <?php
 
 /**
- * Create the body for a multipart/form-data message.
+ * Add the extra headers for a PUT or POST request with a file.
  * 
  * @version $Id$
  * @author Marc Worrell <marc@mediamatic.nl>
  * @copyright (c) 2008 Mediamatic Lab
- * @date  Jan 31, 2008 12:50:05 PM
  */
 
-
-class OAuthMultipartFormdata
+class OAuthBodyContentDisposition
 {
     /**
      * Builds the request string.
@@ -19,36 +17,17 @@ class OAuthMultipartFormdata
      * 
      * file => "path/to/file", filename=, mime=, data=
      *
-     * @param array params		(name => value) (all names and values should be urlencoded)
      * @param array files		(name => filedesc) (not urlencoded)
      * @return array (headers, body)
      */
-    static function encodeBody ( $params, $files )
+    static function encodeBody ( $files )
     {
     	$headers  	= array();
-		$body		= '';
-		$boundary	= 'OAuthRequester_'.md5(uniqid('multipart') . microtime());
-		$headers['Content-Type'] = 'multipart/form-data; boundary=' . $boundary;
+		$body		= null;
 
-
-		// 1. Add the parameters to the post
-		if (!empty($params))
-		{
-			foreach ($params as $name => $value)
-			{
-				$body .= '--'.$boundary."\r\n";
-				$body .= 'Content-Disposition: form-data; name="'.OAuthMultipartFormdata::encodeParameterName(rawurldecode($name)).'"';
-				$body .= "\r\n\r\n";
-				$body .= urldecode($value);
-				$body .= "\r\n";
-			}
-		}
-		
-		// 2. Add all the files to the post
+		// 1. Add all the files to the post
 		if (!empty($files))
 		{
-			$untitled = 1;
-			
 			foreach ($files as $name => $f)
 			{
 				$data     = false;
@@ -64,7 +43,7 @@ class OAuthMultipartFormdata
 					$data = @file_get_contents($f['file']);
 					if ($data === false)
 					{
-						throw new OAuthException(sprintf('Could not read the file "%s" for form-data part', $f['file']));
+						throw new OAuthException(sprintf('Could not read the file "%s" for request body', $f['file']));
 					}
 					if (empty($filename))
 					{
@@ -76,27 +55,34 @@ class OAuthMultipartFormdata
 					$data = $f['data'];
 				}
 				
-				// When there is data, add it as a form-data part, otherwise silently skip the upload
+				// When there is data, add it as a request body, otherwise silently skip the upload
 				if ($data !== false)
 				{
+					if (isset($headers['Content-Disposition']))
+					{
+						throw new OAuthException('Only a single file (or data) allowed in a signed PUT/POST request body.');
+					}
+
 					if (empty($filename))
 					{
-						$filename = sprintf('untitled-%d', $untitled++);
+						$filename = 'untitled';
 					}
 					$mime  = !empty($f['mime']) ? $f['mime'] : 'application/octet-stream';
-					$body .= '--'.$boundary."\r\n";
-					$body .= 'Content-Disposition: form-data; name="'.OAuthMultipartFormdata::encodeParameterName($name).'"; filename="'.OAuthMultipartFormdata::encodeParameterName($filename).'"'."\r\n";
-					$body .= 'Content-Type: '.$mime;
-					$body .= "\r\n\r\n";
-					$body .= $data;
-					$body .= "\r\n";
+					
+					$headers['Content-Disposition'] = 'attachment; filename="'.OAuthBodyContentDisposition::encodeParameterName($filename).'"';
+					$headers['Content-Type']		= $mime;
+
+					$body = $data;
 				}
 				
 			}
-		}
-		$body .= '--'.$boundary."--\r\n";
 
-		$headers['Content-Length'] = strlen($body);
+			// When we have a body, add the content-length
+			if (!is_null($body))
+			{
+				$headers['Content-Length'] = strlen($body);
+			}
+		}
 		return array($headers, $body);
 	}
 	

@@ -151,8 +151,7 @@ class OAuthRequestSigner extends OAuthRequest
 		$h[] = 'Authorization: OAuth realm=""';
 		foreach ($this->param as $name => $value)
 		{
-			if (	(strncmp($name, 'oauth_', 6) == 0 || strncmp($name, 'xoauth_', 7) == 0)
-				&&	($name != 'oauth_token' || strlen($value) > 0))
+			if (strncmp($name, 'oauth_', 6) == 0 || strncmp($name, 'xoauth_', 7) == 0)
           	{
 				$h[] = $name.'="'.$value.'"';
 			}

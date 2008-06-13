@@ -24,18 +24,38 @@
  */
 
 require_once dirname(__FILE__) . '/OAuthRequestSigner.php';
-require_once dirname(__FILE__) . '/OAuthMultipartFormdata.php';
+require_once dirname(__FILE__) . '/body/OAuthBodyContentDisposition.php';
 
 
 class OAuthRequester extends OAuthRequestSigner
 {
 	protected $files;
 
+	/**
+	 * Construct a new request signer.  Perform the request with the doRequest() method below.
+	 * 
+	 * A request can have either one file or a body, not both. 
+	 * 
+	 * The files array consists of arrays:
+	 * - file			the filename/path containing the data for the POST/PUT
+	 * - data			data for the file, omit when you have a file
+	 * - mime			content-type of the file
+	 * - filename		filename for content disposition header
+	 * 
+	 * When OAuth (and PHP) can support multipart/form-data then we can handle more than one file.
+	 * For now max one file, with all the params encoded in the query string.
+	 * 
+	 * @param string request
+	 * @param string method		http method.  GET, PUT, POST etc.
+	 * @param array params		name=>value array with request parameters
+	 * @param string body		optional body to send
+	 * @param array files		optional files to send (max 1 till OAuth support multipart/form-data posts)
+	 */
 	function __construct ( $request, $method = 'GET', $params = null, $body = null, $files = null )
 	{
 		parent::__construct($request, $method, $params, $body);
 
-		// When there are files, then we can construct a POST with multipart/form-data
+		// When there are files, then we can construct a POST with a single file
 		if (!empty($files))
 		{
 			$empty = true;
@@ -69,9 +89,10 @@ class OAuthRequester extends OAuthRequestSigner
 	{
 		if (!empty($this->files))
 		{
-			list($extra_headers, $body) = OAuthMultipartFormdata::encodeBody($this->param, $this->files);
+			// At the moment OAuth does not support multipart/form-data, so try to encode
+			// the supplied file (or data) as the request body and add a content-disposition header.
+			list($extra_headers, $body) = OAuthBodyContentDisposition::encodeBody($this->files);
 			$this->setBody($body);
-			$this->param  = array();
 			$curl_options = $this->prepareCurlOptions($curl_options, $extra_headers);
 		}
 		$this->sign($usr_id);
@@ -182,7 +203,7 @@ class OAuthRequester extends OAuthRequestSigner
 		foreach ($params as $p)
 		{
 			@list($name, $value) = explode('=', $p, 2);
-			$token[$name] = $oauth->urldecode($value);
+			$token[$oauth->urldecode($name)] = $oauth->urldecode($value);
 		}
 		
 		if (!empty($token['oauth_token']) && !empty($token['oauth_token_secret']))
@@ -237,7 +258,7 @@ class OAuthRequester extends OAuthRequestSigner
 		{
 			if ($method == 'TRACE')
 			{
-				throw new OAuthException('A body can not be sent with a TRACE operation (requested method is '.$method.')');
+				throw new OAuthException('A body can not be sent with a TRACE operation');
 			}
 
 			// PUT and POST allow a request body
