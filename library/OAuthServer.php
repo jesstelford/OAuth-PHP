@@ -128,7 +128,7 @@ class OAuthServer extends OAuthRequestVerifier
 				$this->redirect($_SESSION['verify_oauth_callback'], array('oauth_token'=>rawurlencode($token)));
 			}
 		}
-		OAuthRequestLogger::finish();
+		OAuthRequestLogger::flush();
 	}
 	
 	

@@ -90,7 +90,7 @@ class OAuthRequestVerifier extends OAuthRequest
 			OAuthRequestLogger::start($this);
 			$this->verify($token_type);
 			$signed = true;
-			OAuthRequestLogger::finish();
+			OAuthRequestLogger::flush();
 		}
 		else
 		{
