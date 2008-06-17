@@ -1381,7 +1381,10 @@ class OAuthStoreMySQL
 		{
 			$this->sql_errcheck($sql);
 		}
-		mysql_free_result($res);
+		if (is_resource($res))
+		{
+			mysql_free_result($res);
+		}
 	}
 	
 
