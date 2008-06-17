@@ -56,7 +56,7 @@ class OAuthStore
 				
 				if (class_exists($class))
 				{
-					OAuthStore::$instance = new $class();
+					OAuthStore::$instance = new $class($options);
 				}
 				else
 				{

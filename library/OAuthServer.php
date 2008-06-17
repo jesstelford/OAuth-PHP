@@ -54,8 +54,9 @@ class OAuthServer extends OAuthRequestVerifier
 		catch (OAuthException $e)
 		{
 			header('HTTP/1.1 401 Unauthorized');
-			echo "OAuth Verification Failed";
-			// header('HTTP/1.1 400 Bad Request');
+			header('Content-Type: text/plain');
+
+			echo "OAuth Verification Failed: " . $e->getMessage();
 		}
 
 		OAuthRequestLogger::flush();
@@ -159,8 +160,9 @@ class OAuthServer extends OAuthRequestVerifier
 			header('HTTP/1.1 401 Access Denied');
 			header('Content-Type: text/plain');
 
-			echo $e->getMessage();
+			echo "OAuth Verification Failed: " . $e->getMessage();
 		}
+		
 		OAuthRequestLogger::flush();
 		exit();
 	}	
