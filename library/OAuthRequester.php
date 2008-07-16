@@ -106,11 +106,13 @@ class OAuthRequester extends OAuthRequestSigner
 	 * 
 	 * @param string consumer_key
 	 * @param int usr_id
+	 * @param array params (optional) extra arguments for when requesting the request token
+	 * @param string method (optional) change the method of the request, defaults to POST (as it should be)
 	 * @exception OAuthException when no key could be fetched
 	 * @exception OAuthException when no server with consumer_key registered
 	 * @return array (authorize_uri, token)
 	 */
-	static function requestRequestToken ( $consumer_key, $usr_id )
+	static function requestRequestToken ( $consumer_key, $usr_id, $params = null, $method = 'POST' )
 	{
 		OAuthRequestLogger::start();
 
@@ -118,7 +120,7 @@ class OAuthRequester extends OAuthRequestSigner
 		$r		= $store->getServer($consumer_key);
 		$uri 	= $r['request_token_uri'];
 
-		$oauth 	= new OAuthRequester($uri, 'POST');
+		$oauth 	= new OAuthRequester($uri, $method, $params);
 		$oauth->sign($usr_id, $r);
 		$text	= $oauth->curl_raw();
 
@@ -166,10 +168,11 @@ class OAuthRequester extends OAuthRequestSigner
 	 * @param string consumer_key
 	 * @param string token
 	 * @param int usr_id		user requesting the access token
+	 * @param string method (optional) change the method of the request, defaults to POST (as it should be)
 	 * @exception OAuthException when no key could be fetched
 	 * @exception OAuthException when no server with consumer_key registered
 	 */
-	static function requestAccessToken ( $consumer_key, $token, $usr_id )
+	static function requestAccessToken ( $consumer_key, $token, $usr_id, $method = 'POST' )
 	{
 		OAuthRequestLogger::start();
 
@@ -181,7 +184,7 @@ class OAuthRequester extends OAuthRequestSigner
 		$store->deleteServerToken($consumer_key, $r['token'], 0, true);
 
 		// Try to exchange our request token for an access token
-		$oauth 	= new OAuthRequester($uri, 'POST');
+		$oauth 	= new OAuthRequester($uri, $method);
 
 		OAuthRequestLogger::setRequestObject($oauth);
 

@@ -32,6 +32,8 @@ class OAuthServer extends OAuthRequestVerifier
 	 * Returns the new request token and request token secret.
 	 * 
 	 * TODO: add correct result code to exception
+	 * 
+	 * @return string 	returned request token, false on an error
 	 */
 	public function requestToken ()
 	{
@@ -45,14 +47,19 @@ class OAuthServer extends OAuthRequestVerifier
 			$token  = $store->addConsumerRequestToken($this->getParam('oauth_consumer_key', true));
 			$result = 'oauth_token='.$this->urlencode($token['token'])
 					.'&oauth_token_secret='.$this->urlencode($token['token_secret']);
+
+			$request_token = $token['token'];
 					
 			header('HTTP/1.1 200 OK');
 			header('Content-Length: '.strlen($result));
 			header('Content-Type: application/x-www-form-urlencoded');
+
 			echo $result;
 		}
 		catch (OAuthException $e)
 		{
+			$request_token = false;
+
 			header('HTTP/1.1 401 Unauthorized');
 			header('Content-Type: text/plain');
 
@@ -60,12 +67,15 @@ class OAuthServer extends OAuthRequestVerifier
 		}
 
 		OAuthRequestLogger::flush();
-		exit();
+		return $request_token;
 	}
 	
 	
 	/**
 	 * Verify the start of an authorization request.  Verifies if the request token is valid.
+	 * Next step is the method authorizeFinish()
+	 * 
+	 * Nota bene: this stores the current token, consumer key and callback in the _SESSION
 	 * 
 	 * @exception OAuthException thrown when not a valid request
 	 * @return array token description
@@ -97,9 +107,12 @@ class OAuthServer extends OAuthRequestVerifier
 	
 	
 	/**
-	 * Overrule this method when you want to want to display a nice page when
+	 * Overrule this method when you want to display a nice page when
 	 * the authorization is finished.  This function does not know if the authorization was
 	 * succesfull, you need to check the token in the database.
+	 * 
+	 * @param boolean authorized	if the current token (oauth_token param) is authorized or not
+	 * @param int user_id			user for which the token was authorized (or denied)
 	 */
 	public function authorizeFinish ( $authorized, $user_id )
 	{
@@ -135,6 +148,8 @@ class OAuthServer extends OAuthRequestVerifier
 	/**
 	 * Exchange a request token for an access token.
 	 * The exchange is only succesful iff the request token has been authorized.
+	 * 
+	 * Never returns, calls exit() when token is exchanged or when error is returned.
 	 */
 	public function accessToken ()
 	{
