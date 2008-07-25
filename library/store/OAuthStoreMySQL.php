@@ -1511,7 +1511,7 @@ class OAuthStoreMySQL
 		$sql  = array_shift($args);
 		if (count($args) == 1 && is_array($args[0]))
 		{
-			$args = $args[1];
+			$args = $args[0];
 		}
 		$args = array_map(array($this, 'sql_escape_string'), $args);
 		return vsprintf($sql, $args);
