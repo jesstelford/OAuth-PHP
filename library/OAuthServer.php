@@ -100,7 +100,6 @@ class OAuthServer extends OAuthRequestVerifier
 			$_SESSION['verify_oauth_consumer_key']	= $rs['consumer_key'];
 			$_SESSION['verify_oauth_callback']		= $this->getParam('oauth_callback', true);
 		}
-
 		OAuthRequestLogger::flush();
 		return $rs;
 	}
@@ -124,11 +123,24 @@ class OAuthServer extends OAuthRequestVerifier
 		{
 			// Flag the token as authorized, or remove the token when not authorized
 			$store = OAuthStore::instance();
+
+			// Fetch the referrer host from the oauth callback parameter
+			$referrer_host  = '';
+			$oauth_callback = false;
+			if (!empty($_SESSION['verify_oauth_callback']))
+			{
+				$oauth_callback = $_SESSION['verify_oauth_callback'];
+				$ps = parse_url($oauth_callback);
+				if (isset($ps['host']))
+				{
+					$referrer_host = $ps['host'];
+				}
+			}
 			
 			if ($authorized)
 			{
-				OAuthRequestLogger::addNote('Authorized token "'.$token.'" for user '.$user_id);
-				$store->authorizeConsumerRequestToken($token, $user_id);
+				OAuthRequestLogger::addNote('Authorized token "'.$token.'" for user '.$user_id.' with referrer "'.$referrer_host.'"');
+				$store->authorizeConsumerRequestToken($token, $user_id, $referrer_host);
 			}
 			else
 			{
@@ -136,9 +148,9 @@ class OAuthServer extends OAuthRequestVerifier
 				$store->deleteConsumerRequestToken($token);
 			}
 			
-			if (!empty($_SESSION['verify_oauth_callback']))
+			if (!empty($oauth_callback))
 			{
-				$this->redirect($_SESSION['verify_oauth_callback'], array('oauth_token'=>rawurlencode($token)));
+				$this->redirect($oauth_callback, array('oauth_token'=>rawurlencode($token)));
 			}
 		}
 		OAuthRequestLogger::flush();

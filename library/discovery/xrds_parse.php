@@ -59,6 +59,9 @@ function xrds_parse ( $data )
 	$xpath->registerNamespace('xrd',  	'xri://$XRD*($v*2.0)');
 	$xpath->registerNamespace('simple', 'http://xrds-simple.net/core/1.0');
 
+	// Yahoo! uses this namespace, with lowercase xrd in it
+	$xpath->registerNamespace('xrd2',  	'xri://$xrd*($v*2.0)');
+
 	$uris = xrds_oauth_service_uris($xpath);
 
 	foreach ($uris as $uri)
@@ -90,6 +93,12 @@ function xrds_xrd_oauth ( $xpath, $id )
 {
 	$oauth = array();
 	$xrd   = $xpath->query('//xrds:XRDS/xrd:XRD[@xml:id="'.$id.'"]');
+	if ($xrd->length == 0)
+	{
+		// Yahoo! uses another namespace
+		$xrd = $xpath->query('//xrds:XRDS/xrd2:XRD[@xml:id="'.$id.'"]');
+	}
+
 	if ($xrd->length >= 1)
 	{
 		$x 		  = $xrd->item(0);

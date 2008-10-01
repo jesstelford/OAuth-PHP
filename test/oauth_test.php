@@ -92,12 +92,11 @@ function oauth_test ()
 
 	echo "***** HMAC-SHA1 *****\n\n";
 
-	
+	OAuthStore::instance('MySQL', array('conn'=>false));
 	$req = new OAuthRequestSigner('http://photos.example.net/photos?file=vacation.jpg&size=original', 'GET');	
-	$req->selectSignatureMethod(array('HMAC-SHA1'));
 
-	assert('$req->urldecode($req->signature_HMAC_SHA1(\'bs\', \'cs\', \'\')) == \'egQqG5AJep5sJ7anhXju1unge2I=\'');
-	assert('$req->urldecode($req->signature_HMAC_SHA1(\'bs\', \'cs\', \'ts\')) == \'VZVjXceV7JgPq/dOTnNmEfO0Fv8=\'');
+	assert('$req->urldecode($req->calculateDataSignature(\'bs\', \'cs\', \'\',   \'HMAC-SHA1\')) == \'egQqG5AJep5sJ7anhXju1unge2I=\'');
+	assert('$req->urldecode($req->calculateDataSignature(\'bs\', \'cs\', \'ts\', \'HMAC-SHA1\')) == \'VZVjXceV7JgPq/dOTnNmEfO0Fv8=\'');
 	
 	$secrets = array(
 				'consumer_key'		=> 'dpf43f3p2l4k3l03',
@@ -111,7 +110,37 @@ function oauth_test ()
 	$req->sign(0, $secrets);
 	assert('$req->getParam(\'oauth_signature\', true) == \'tR3+Ty81lMeYAr/Fid0kMTYa/WM=\'');
 	
-	echo "\n\nFinished.";
+	
+	echo "***** Yahoo! test case ******\n\n";
+
+	OAuthStore::instance('MySQL', array('conn'=>false));
+	$req = new OAuthRequestSigner('http://example.com:80/photo', 'GET');
+	
+	$req->setParam('title',   'taken with a 30% orange filter');
+	$req->setParam('file',    'mountain & water view');
+	$req->setParam('format',  'jpeg');
+	$req->setParam('include', array('date','aperture'));
+
+	$secrets = array(
+				'consumer_key'		=> '1234=asdf=4567',
+				'consumer_secret'	=> 'erks823*43=asd&123ls%23',
+				'token'				=> 'asdf-4354=asew-5698',
+				'token_secret'		=> 'dis9$#$Js009%==',
+				'signature_methods'	=> array('HMAC-SHA1'),
+				'nonce'				=> '3jd834jd9',
+				'timestamp'			=> '12303202302'
+				);
+	$req->sign(0, $secrets);
+
+	// echo "Basestring:\n",$req->signatureBaseString(), "\n\n";
+
+	//echo "queryString:\n",$req->getQueryString(), "\n\n";
+	assert('$req->getQueryString() == \'title=taken%20with%20a%2030%25%20orange%20filter&file=mountain%20%26%20water%20view&format=jpeg&include=date&include=aperture\'');	
+
+	//echo "oauth_signature:\n",$req->getParam('oauth_signature', true),"\n\n";
+	assert('$req->getParam(\'oauth_signature\', true) == \'jMdUSR1vOr3SzNv3gZ5DDDuGirA=\'');
+	
+	echo "\n\nFinished.\n";
 }
 
 

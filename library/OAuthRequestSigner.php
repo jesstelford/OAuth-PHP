@@ -176,7 +176,17 @@ class OAuthRequestSigner extends OAuthRequest
 			if (	!$oauth_as_header 
 				||	(strncmp($name, 'oauth_', 6) != 0 && strncmp($name, 'xoauth_', 7) != 0))
 			{
-				$parms[] = $name.'='.$value;
+				if (is_array($value))
+				{
+					foreach ($value as $v)
+					{
+						$parms[] = $name.'='.$v;
+					}
+				}
+				else
+				{
+					$parms[] = $name.'='.$value;
+				}
 			}
 		}
 		return implode('&', $parms);

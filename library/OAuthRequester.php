@@ -96,8 +96,13 @@ class OAuthRequester extends OAuthRequestSigner
 			$curl_options = $this->prepareCurlOptions($curl_options, $extra_headers);
 		}
 		$this->sign($usr_id);
-		$text = $this->curl_raw($curl_options);
-		return $this->curl_parse($text);	
+		$text   = $this->curl_raw($curl_options);
+		$result = $this->curl_parse($text);	
+		if ($result['code'] >= 400)
+		{
+			throw new OAuthException('Request failed with code ' . $result['code'] . ': ' . $result['body']);
+		}
+		return $result;
 	}
 
 	
@@ -117,7 +122,7 @@ class OAuthRequester extends OAuthRequestSigner
 		OAuthRequestLogger::start();
 
 		$store	= OAuthStore::instance();
-		$r		= $store->getServer($consumer_key);
+		$r		= $store->getServer($consumer_key, $usr_id);
 		$uri 	= $r['request_token_uri'];
 
 		$oauth 	= new OAuthRequester($uri, $method, $params);

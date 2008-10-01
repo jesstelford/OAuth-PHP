@@ -9,6 +9,13 @@
 # @author Marc Worrell
 #
 
+# Changes:
+#
+# 2008-09-09 (on r5) Added referrer host to server access token
+#			ALTER TABLE oauth_server_token ADD ost_referrer_host VARCHAR(128) NOT NULL;
+#
+
+
 
 #
 # Log table to hold all OAuth request when you enabled logging
@@ -171,6 +178,7 @@ CREATE TABLE IF NOT EXISTS oauth_server_token (
     ost_token_secret        varchar(64) binary not null,
     ost_token_type          enum('request','access'),
     ost_authorized          tinyint(1) not null default '0',
+	ost_referrer_host		varchar(128) not null,
     ost_timestamp           timestamp not null default current_timestamp,
 
     primary key (ost_id),
