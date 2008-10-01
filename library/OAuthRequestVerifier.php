@@ -46,12 +46,11 @@ class OAuthRequestVerifier extends OAuthRequest
 	 * 
 	 * @param string request
 	 * @param string method
-	 * @param string postdata
 	 */
-	function __construct ()
+	function __construct ( $uri = null, $method = 'GET' )
 	{
 		$this->store = OAuthStore::instance();
-		parent::__construct();
+		parent::__construct($uri, $method);
 		
 		OAuthRequestLogger::start($this);
 	}
@@ -132,13 +131,17 @@ class OAuthRequestVerifier extends OAuthRequest
 											$this->getParam('oauth_timestamp', true),
 											$this->getParam('oauth_nonce', true));
 
-			$signature = $this->calculateSignature($secrets['consumer_secret'], $secrets['token_secret'], $token_type);
 			$oauth_sig = $this->getParam('oauth_signature');
-
-			if (	empty($oauth_sig) 
-				||	!$this->verifySignature(	$this->getParam('oauth_signature_method'), 
-												$oauth_sig,
-												$signature))
+			if (empty($oauth_sig))
+			{
+				throw new OAuthException('Verification of signature failed (no oauth_signature in request).');
+			} 
+			
+			try
+			{
+				$this->verifySignature($secrets['consumer_secret'], $secrets['token_secret'], $token_type);
+			}
+			catch (OAuthException $e)
 			{
 				throw new OAuthException('Verification of signature failed (signature base string was "'.$this->signatureBaseString().'").');
 			}
@@ -151,12 +154,14 @@ class OAuthRequestVerifier extends OAuthRequest
 				{
 					$method = $this->getParam('oauth_signature_method');
 				}
-				$body_signature = $this->calculateDataSignature($this->getBody(), $secrets['consumer_secret'], $secrets['token_secret'], $method);
-				if (!$this->verifySignature(	$method, 
-												$this->getParam('xoauth_body_signature'),
-												$body_signature))
+
+				try
 				{
-					throw new OAuthException('Verification of body signature failed');
+					$this->verifyDataSignature($this->getBody(), $secrets['consumer_secret'], $secrets['token_secret'], $method, $this->getParam('xoauth_body_signature'));
+				}
+				catch (OAuthException $e)
+				{
+					throw new OAuthException('Verification of body signature failed.');
 				}
 			}
 			
@@ -173,42 +178,75 @@ class OAuthRequestVerifier extends OAuthRequest
 		return $user_id;
 	}
 
-	
+
+
 	/**
-	 * Verify if the two signatures are equal.
+	 * Verify the signature of the request, using the method in oauth_signature_method.
+	 * The signature is returned encoded in the form as used in the url.  So the base64 and
+	 * urlencoding has been done.
 	 * 
-	 * @param string method
-	 * @param string sigA
-	 * @param string sigB
-	 * @return boolean		true when equal
+	 * @param string consumer_secret
+	 * @param string token_secret
+	 * @exception OAuthException thrown when the signature method is unknown 
+	 * @exception OAuthException when not all parts available
+	 * @exception OAuthException when signature does not match
 	 */
-	public function verifySignature ( $method, $sigA, $sigB )
+	public function verifySignature ( $consumer_secret, $token_secret, $token_type = 'access' )
 	{
-		$a = $this->urldecode($sigA);
-		$b = $this->urldecode($sigB);
+		$required = array(
+						'oauth_consumer_key',
+						'oauth_signature_method',
+						'oauth_timestamp',
+						'oauth_nonce',
+						'oauth_signature'
+					);
 
-		switch (strtoupper($method))
+		if ($token_type !== false)
 		{
-		case 'PLAINTEXT':
-			$equal = ($this->urldecode($a) == $this->urldecode($b));
-			break;
-
-		case 'MD5':
-		case 'HMAC-SHA1':
-		case 'HMAC_SHA1':
-			// We have to compare the decoded values
-			$valA  = base64_decode($a);
-			$valB  = base64_decode($b);
-			// Crude binary comparison
-			$equal = (rawurlencode($a) == rawurlencode($b));
-			break;
-		
-		default:
-			$equal = ($sigA == $sigB);
-			break;
+			$required[] = 'oauth_token';
 		}
-		return $equal;
+
+		foreach ($required as $req)
+		{
+			if (!isset($this->param[$req]))
+			{
+				throw new OAuthException('Can\'t verify request signature, missing parameter "'.$req.'"');
+			}
+		}
+
+		$this->checks();
+
+		$base = $this->signatureBaseString();
+		$this->verifyDataSignature($base, $consumer_secret, $token_secret, $this->param['oauth_signature_method'], $this->param['oauth_signature']);
 	}
+
+
+
+	/**
+	 * Verify the signature of a string.
+	 * 
+	 * @param string 	data
+	 * @param string	consumer_secret
+	 * @param string	token_secret
+	 * @param string 	signature_method
+	 * @param string 	signature
+	 * @exception OAuthException thrown when the signature method is unknown 
+	 * @exception OAuthException when signature does not match
+	 */
+	public function verifyDataSignature ( $data, $consumer_secret, $token_secret, $signature_method, $signature )
+	{
+		if (is_null($data))
+		{
+			$data = '';
+		}
+
+		$sig = $this->getSignatureMethod($signature_method);
+		if (!$sig->verify($this, $data, $consumer_secret, $token_secret, $signature))
+		{
+			throw new OAuthException('Signature verification failed ('.$signature_method.')');
+		}
+	}
+
 }
 
 

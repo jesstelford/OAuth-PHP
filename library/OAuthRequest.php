@@ -185,7 +185,7 @@ class OAuthRequest
 		$signature = $this->calculateDataSignature($base, $consumer_secret, $token_secret, $this->param['oauth_signature_method']);
 		return $signature;
 	}
-	
+
 	
 	/**
 	 * Calculate the signature of a string.

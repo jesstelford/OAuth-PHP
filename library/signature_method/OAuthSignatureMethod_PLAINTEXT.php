@@ -54,6 +54,25 @@ class OAuthSignatureMethod_PLAINTEXT extends OAuthSignatureMethod
 	{
 		return $request->urlencode($request->urlencode($consumer_secret).'&'.$request->urlencode($token_secret));
 	}
+
+
+	/**
+	 * Check if the request signature corresponds to the one calculated for the request.
+	 * 
+	 * @param OAuthRequest request
+	 * @param string base_string	data to be signed, usually the base string, can be a request body
+	 * @param string consumer_secret
+	 * @param string token_secret
+	 * @param string signature		from the request, still urlencoded
+	 * @return string
+	 */
+	public function verify ( $request, $base_string, $consumer_secret, $token_secret, $signature )
+	{
+		$a = $request->urldecode($signature);
+		$b = $request->urldecode($this->signature($request, $base_string, $consumer_secret, $token_secret));
+
+		return $request->urldecode($a) == $request->urldecode($b);
+	}
 }
 
 /* vi:set ts=4 sts=4 sw=4 binary noeol: */

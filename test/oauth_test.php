@@ -61,7 +61,7 @@ function oauth_test ()
 	
 	$req = new OAuthRequest('http://www.example.com', 'GET');
 
-	echo "\n\n***** Parameter Encoding *****\n\n";
+	echo "***** Parameter Encoding *****\n\n";
 	
 	assert('$req->urlencode(\'abcABC123\') == \'abcABC123\'');
 	assert('$req->urlencode(\'-._~\') == \'-._~\'');
@@ -111,7 +111,7 @@ function oauth_test ()
 	assert('$req->signatureBaseString() == \'GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26oauth_nonce%3Dkllo9940pd9333jh%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26oauth_version%3D1.0%26size%3Doriginal\'');
 
 
-	echo "***** HMAC-SHA1 *****\n\n";
+	echo "***** HMAC-SHA1 *****\nRequest signing\n";
 
 	OAuthStore::instance('MySQL', array('conn'=>false));
 	$req = new OAuthRequestSigner('http://photos.example.net/photos?file=vacation.jpg&size=original', 'GET');	
@@ -130,8 +130,20 @@ function oauth_test ()
 				);
 	$req->sign(0, $secrets);
 	assert('$req->getParam(\'oauth_signature\', true) == \'tR3+Ty81lMeYAr/Fid0kMTYa/WM=\'');
+
+	echo "***** HMAC-SHA1 *****\nRequest verification\n";
+
+	$req = new OAuthRequestVerifier(
+				'http://photos.example.net/photos?file=vacation.jpg&size=original'
+				.'&oauth_consumer_key=dpf43f3p2l4k3l03&oauth_token=nnch734d00sl2jdk'
+				.'&oauth_signature_method=HMAC-SHA1&oauth_nonce=kllo9940pd9333jh'
+				.'&oauth_timestamp=1191242096&oauth_version=1.0'
+				.'&oauth_signature='.rawurlencode('tR3+Ty81lMeYAr/Fid0kMTYa/WM=')
+				, 'GET');
 	
-	
+	$req->verifySignature('kd94hf93k423kf44', 'pfkkdhi9sl3r4s00');
+
+	echo "\n";
 	echo "***** Yahoo! test case ******\n\n";
 
 	OAuthStore::instance('MySQL', array('conn'=>false));

@@ -54,16 +54,13 @@ abstract class OAuthSignatureMethod
 	 * Check if the request signature corresponds to the one calculated for the request.
 	 * 
 	 * @param OAuthRequest request
-	 * @param string base_string
+	 * @param string base_string	data to be signed, usually the base string, can be a request body
 	 * @param string consumer_secret
 	 * @param string token_secret
-	 * @param string signature
+	 * @param string signature		from the request, still urlencoded
 	 * @return string
 	 */
-	public function verify ( $request, $base_string, $consumer_secret, $token_secret, $signature )
-	{
-		return $this->signature() == $signature;
-	}
+	abstract public function verify ( $request, $base_string, $consumer_secret, $token_secret, $signature );
 }
 
 
