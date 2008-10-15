@@ -50,11 +50,23 @@ class OAuthServer extends OAuthRequestVerifier
 		{
 			$this->verify(false);
 			
+			$options = array();
+			$ttl     = $this->getParam('xoauth_token_ttl', false);
+			if ($ttl)
+			{
+				$options['token_ttl'] = $ttl;
+			}
+
 			// Create a request token
 			$store  = OAuthStore::instance();
-			$token  = $store->addConsumerRequestToken($this->getParam('oauth_consumer_key', true));
+			$token  = $store->addConsumerRequestToken($this->getParam('oauth_consumer_key', true), $options);
 			$result = 'oauth_token='.$this->urlencode($token['token'])
 					.'&oauth_token_secret='.$this->urlencode($token['token_secret']);
+
+			if (!empty($token['token_ttl']))
+			{
+				$result .= '&xoauth_token_ttl='.$this->urlencode($token['token_ttl']);
+			}
 
 			$request_token = $token['token'];
 					
@@ -178,11 +190,23 @@ class OAuthServer extends OAuthRequestVerifier
 		try
 		{
 			$this->verify('request');
+
+			$options = array();
+			$ttl     = $this->getParam('xoauth_token_ttl', false);
+			if ($ttl)
+			{
+				$options['token_ttl'] = $ttl;
+			}
 			
 			$store  = OAuthStore::instance();
-			$token  = $store->exchangeConsumerRequestForAccessToken($this->getParam('oauth_token', true));
+			$token  = $store->exchangeConsumerRequestForAccessToken($this->getParam('oauth_token', true), $options);
 			$result = 'oauth_token='.$this->urlencode($token['token'])
 					.'&oauth_token_secret='.$this->urlencode($token['token_secret']);
+					
+			if (!empty($token['token_ttl']))
+			{
+				$result .= '&xoauth_token_ttl='.$this->urlencode($token['token_ttl']);
+			}
 					
 			header('HTTP/1.1 200 OK');
 			header('Content-Length: '.strlen($result));

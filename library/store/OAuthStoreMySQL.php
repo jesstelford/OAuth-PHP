@@ -51,6 +51,12 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	protected $max_timestamp_skew = 600;
 
 	/**
+	 * Default ttl for request tokens
+	 */
+	protected $max_request_token_ttl = 3600;
+	
+
+	/**
 	 * Construct the OAuthStoreMySQL.
 	 * In the options you have to supply either:
 	 * - server, username, password and database (for a mysql_connect)
@@ -102,8 +108,6 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * Find stored credentials for the consumer key and token. Used by an OAuth server
 	 * when verifying an OAuth request.
 	 * 
-	 * TODO: also check the status of the consumer key
-	 * 
 	 * @param string consumer_key
 	 * @param string token
 	 * @param string token_type		false, 'request' or 'access'
@@ -149,7 +153,8 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 						  AND osr_consumer_key	= \'%s\'
 						  AND ost_token			= \'%s\'
 					 	  AND osr_enabled		= 1
-						', 
+						  AND ost_token_ttl     >= NOW()
+						',
 						$token_type, $consumer_key, $token);
 		}
 		
@@ -178,10 +183,11 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @todo filter on token type (we should know how and with what to sign this request, and there might be old access tokens)
 	 * @param string uri	uri of the server
 	 * @param int user_id	id of the logged on user
+	 * @param string name	(optional) name of the token (case sensitive)
 	 * @exception OAuthException when no credentials found
 	 * @return array
 	 */
-	public function getSecretsForSignature ( $uri, $user_id )
+	public function getSecretsForSignature ( $uri, $user_id, $name = '' )
 	{
 		// Find a consumer key and token for the given uri
 		$ps		= parse_url($uri);
@@ -207,9 +213,11 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 					  AND (ocr_usa_id_ref = %s OR ocr_usa_id_ref IS NULL)
 					  AND oct_usa_id_ref	  = %d
 					  AND oct_token_type      = \'access\'
+					  AND oct_name			  = \'%s\'
+					  AND oct_token_ttl       >= NOW()
 					ORDER BY ocr_usa_id_ref DESC, ocr_consumer_secret DESC, LENGTH(ocr_server_uri_path) DESC
 					LIMIT 0,1
-					', $host, $path, $user_id, $user_id
+					', $host, $path, $user_id, $user_id, $name
 					);
 		
 		if (empty($secrets))
@@ -228,10 +236,11 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string 	token
 	 * @param string	token_type
 	 * @param int		user_id			the user owning the token
+	 * @param string	name			optional name for a named token
 	 * @exception OAuthException when no credentials found
 	 * @return array
 	 */
-	public function getServerTokenSecrets ( $consumer_key, $token, $token_type, $user_id )
+	public function getServerTokenSecrets ( $consumer_key, $token, $token_type, $user_id, $name = '' )
 	{
 		if ($token_type != 'request' && $token_type != 'access')
 		{
@@ -244,11 +253,13 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 							ocr_consumer_secret		as consumer_secret,
 							oct_token				as token,
 							oct_token_secret		as token_secret,
+							oct_name				as token_name,
 							ocr_signature_methods	as signature_methods,
 							ocr_server_uri			as server_uri,
 							ocr_request_token_uri	as request_token_uri,
 							ocr_authorize_uri		as authorize_uri,
-							ocr_access_token_uri	as access_token_uri
+							ocr_access_token_uri	as access_token_uri,
+							IF(oct_token_ttl >= \'9999-12-31\', NULL, UNIX_TIMESTAMP(oct_token_ttl) - UNIX_TIMESTAMP(NOW())) as token_ttl
 					FROM oauth_consumer_registry
 							JOIN oauth_consumer_token
 							ON oct_ocr_id_ref = ocr_id
@@ -256,6 +267,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 					  AND oct_token_type   = \'%s\'
 					  AND oct_token        = \'%s\'
 					  AND oct_usa_id_ref   = %d
+					  AND oct_token_ttl    >= NOW()
 					', $consumer_key, $token_type, $token, $user_id
 					);
 					
@@ -284,16 +296,31 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string token
 	 * @param string token_secret
 	 * @param int 	 user_id			the user owning the token
+	 * @param array  options			extra options, name and token_ttl
 	 * @exception OAuthException when server is not known
 	 * @exception OAuthException when we received a duplicate token
 	 */
-	public function addServerToken ( $consumer_key, $token_type, $token, $token_secret, $user_id )
+	public function addServerToken ( $consumer_key, $token_type, $token, $token_secret, $user_id, $options = array() )
 	{
 		if ($token_type != 'request' && $token_type != 'access')
 		{
 			throw new OAuthException('Unknown token type "'.$token_type.'", must be either "request" or "access"');
 		}
 
+		// Maximum time to live for this token
+		if (isset($options['token_ttl']) && is_numeric($options['token_ttl']))
+		{
+			$ttl = 'DATE_ADD(NOW(), INTERVAL '.intval($options['token_ttl']).' SECOND)';
+		}
+		else if ($token == 'request')
+		{
+			$ttl = 'DATE_ADD(NOW(), INTERVAL '.$this->max_request_token_ttl.' SECOND)';
+		}
+		else
+		{
+			$ttl = "'9999-12-31'";
+		}
+		
 		$ocr_id = $this->query_one('
 					SELECT ocr_id
 					FROM oauth_consumer_registry
@@ -305,29 +332,44 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 			throw new OAuthException('No server associated with consumer_key "'.$consumer_key.'"');
 		}
 		
-		// Delete any old tokens with the same type for this user/server combination
+		// Named tokens, unique per user/consumer key
+		if (isset($options['name']) && $options['name'] != '')
+		{
+			$name = $options['name'];
+		}
+		else
+		{
+			$name = '';
+		}
+
+		// Delete any old tokens with the same type and name for this user/server combination
 		$this->query('
 					DELETE FROM oauth_consumer_token
-					WHERE oct_ocr_id_ref	= %d
-					  AND oct_usa_id_ref	= %d
-					  AND oct_token_type	= LOWER(\'%s\')
+					WHERE oct_ocr_id_ref = %d
+					  AND oct_usa_id_ref = %d
+					  AND oct_token_type = LOWER(\'%s\')
+					  AND oct_name       = \'%s\'
 					',
 					$ocr_id,
 					$user_id,
-					$token_type);
+					$token_type,
+					$name);
 
 		// Insert the new token
 		$this->query('
 					INSERT IGNORE INTO oauth_consumer_token
 					SET oct_ocr_id_ref	= %d,
 						oct_usa_id_ref  = %d,
+						oct_name		= \'%s\',
 						oct_token		= \'%s\',
 						oct_token_secret= \'%s\',
 						oct_token_type	= LOWER(\'%s\'),
-						oct_timestamp	= NOW()
+						oct_timestamp	= NOW(),
+						oct_token_ttl	= '.$ttl.'
 					',
 					$ocr_id,
 					$user_id,
+					$name,
 					$token,
 					$token_secret,
 					$token_type);
@@ -490,6 +532,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 							ON oct_ocr_id_ref = ocr_id
 					WHERE oct_usa_id_ref = %d
 					  AND oct_token_type = \'access\'
+					  AND oct_token_ttl  >= NOW()
 					ORDER BY ocr_server_uri_host, ocr_server_uri_path
 					', $user_id);
 		return $ts;
@@ -511,6 +554,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 							ON oct_ocr_id_ref = ocr_id
 					WHERE oct_token_type   = \'access\'
 					  AND ocr_consumer_key = \'%s\'
+					  AND oct_token_ttl    >= NOW()
 					', $consumer_key);
 		
 		return $count;
@@ -549,6 +593,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 					  AND oct_usa_id_ref   = %d
 					  AND oct_token_type   = \'access\'
 					  AND oct_token        = \'%s\'
+					  AND oct_ttl          >= NOW()
 					', $consumer_key, $user_id, $token);
 		
 		if (empty($ts))
@@ -565,7 +610,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string consumer_key
 	 * @param string token
 	 * @param int user_id
-	 * @param boolean no_user_check
+	 * @param boolean user_is_admin
 	 */
 	public function deleteServerToken ( $consumer_key, $token, $user_id, $user_is_admin = false )
 	{
@@ -591,6 +636,35 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 				  AND oct_token			= \'%s\'
 				  AND oct_usa_id_ref	= %d
 				', $consumer_key, $token, $user_id);
+		}
+	}
+
+
+	/**
+	 * Set the ttl of a server access token.  This is done when the
+	 * server receives a valid request with a xoauth_token_ttl parameter in it.
+	 * 
+	 * @param string consumer_key
+	 * @param string token
+	 * @param int token_ttl
+	 */
+	public function setServerTokenTtl ( $consumer_key, $token, $token_ttl )
+	{
+		if ($token_ttl <= 0)
+		{
+			// Immediate delete when the token is past its ttl
+			$this->deleteServerToken($consumer_key, $token, 0, true);
+		}
+		else
+		{
+			// Set maximum time to live for this token
+			$this->query('
+						UPDATE oauth_consumer_token, oauth_consumer_registry
+						SET ost_token_ttl = DATE_ADD(NOW(), INTERVAL %d SECOND)
+						WHERE ocr_consumer_key	= \'%s\'
+						  AND oct_ocr_id_ref    = ocr_id
+						  AND oct_token 	    = \'%s\'
+						', $token_ttl, $consumer_key, $token);
 		}
 	}
 
@@ -1099,9 +1173,10 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * Add an unautorized request token to our server.
 	 * 
 	 * @param string consumer_key
+	 * @param array options		(eg. token_ttl)
 	 * @return array (token, token_secret)
 	 */
-	public function addConsumerRequestToken ( $consumer_key )
+	public function addConsumerRequestToken ( $consumer_key, $options = array() )
 	{
 		$token  = $this->generateKey(true);
 		$secret = $this->generateKey();
@@ -1115,7 +1190,16 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		if (!$osr_id)
 		{
 			throw new OAuthException('No server with consumer_key "'.$consumer_key.'" or consumer_key is disabled');
-		}	
+		}
+
+		if (isset($options['token_ttl']) && is_numeric($options['token_ttl']))
+		{
+			$ttl = intval($options['token_ttl']);
+		}
+		else
+		{
+			$ttl = $this->max_request_token_ttl;
+		}
 
 		$this->query('
 				INSERT INTO oauth_server_token
@@ -1123,17 +1207,19 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 					ost_usa_id_ref		= 1,
 					ost_token			= \'%s\',
 					ost_token_secret	= \'%s\',
-					ost_token_type		= \'request\'
+					ost_token_type		= \'request\',
+					ost_token_ttl       = DATE_ADD(NOW(), INTERVAL %d SECOND)
 				ON DUPLICATE KEY UPDATE
 					ost_osr_id_ref		= VALUES(ost_osr_id_ref),
 					ost_usa_id_ref		= VALUES(ost_usa_id_ref),
 					ost_token			= VALUES(ost_token),
 					ost_token_secret	= VALUES(ost_token_secret),
 					ost_token_type		= VALUES(ost_token_type),
+					ost_token_ttl       = VALUES(ost_token_ttl),
 					ost_timestamp		= NOW()
-				', $osr_id, $token, $secret);
+				', $osr_id, $token, $secret, $ttl);
 		
-		return array('token'=>$token, 'token_secret'=>$secret);
+		return array('token'=>$token, 'token_secret'=>$secret, 'token_ttl'=>$ttl);
 	}
 	
 	
@@ -1156,6 +1242,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 						ON ost_osr_id_ref = osr_id
 				WHERE ost_token_type = \'request\'
 				  AND ost_token      = \'%s\'
+				  AND ost_token_ttl  >= NOW()
 				', $token);
 		
 		return $rs;
@@ -1213,6 +1300,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 							ON ost_osr_id_ref = osr_id
 					WHERE ost_token_type   = \'access\'
 					  AND osr_consumer_key = \'%s\'
+					  AND ost_token_ttl    >= NOW()
 					', $consumer_key);
 		
 		return $count;
@@ -1223,31 +1311,54 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * Exchange an authorized request token for new access token.
 	 * 
 	 * @param string token
-	 * @param int	 user_id  user authorizing the token
+	 * @param array options		options for the token, token_ttl
 	 * @exception OAuthException when token could not be exchanged
 	 * @return array (token, token_secret)
 	 */
-	public function exchangeConsumerRequestForAccessToken ( $token )
+	public function exchangeConsumerRequestForAccessToken ( $token, $options = array() )
 	{
 		$new_token  = $this->generateKey(true);
 		$new_secret = $this->generateKey();
+
+		// Maximum time to live for this token
+		if (isset($options['token_ttl']) && is_numeric($options['token_ttl']))
+		{
+			$ttl_sql = 'DATE_ADD(NOW(), INTERVAL '.intval($options['token_ttl']).' SECOND)';
+		}
+		else
+		{
+			$ttl_sql = "'9999-12-31'";
+		}
 
 		$this->query('
 					UPDATE oauth_server_token
 					SET ost_token			= \'%s\',
 						ost_token_secret	= \'%s\',
 						ost_token_type		= \'access\',
-						ost_timestamp		= NOW()
+						ost_timestamp		= NOW(),
+						ost_token_ttl       = '.$ttl_sql.'
 					WHERE ost_token      = \'%s\'
 					  AND ost_token_type = \'request\'
 					  AND ost_authorized = 1
+					  AND ost_token_ttl  >= NOW()
 					', $new_token, $new_secret, $token);
 		
 		if ($this->query_affected_rows() != 1)
 		{
 			throw new OAuthException('Can\'t exchange request token "'.$token.'" for access token. No such token or not authorized');
 		}
-		return array('token' => $new_token, 'token_secret' => $new_secret);
+
+		$ret = array('token' => $new_token, 'token_secret' => $new_secret);
+		$ttl = any_db_query_one('
+					SELECT	IF(ost_token_ttl >= \'9999-12-31\', NULL, UNIX_TIMESTAMP(ost_token_ttl) - UNIX_TIMESTAMP(NOW())) as token_ttl
+					FROM oauth_server_token
+					WHERE ost_token = \'%s\'', $new_token);
+
+		if (is_numeric($ttl))
+		{
+			$ret['token_ttl'] = intval($ttl);
+		}
+		return $ret;
 	}
 
 
@@ -1276,6 +1387,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 				WHERE ost_token_type = \'access\'
 				  AND ost_token      = \'%s\'
 				  AND ost_usa_id_ref = %d
+				  AND ost_token_ttl  >= NOW()
 				', $token, $user_id);
 		
 		if (empty($rs))
@@ -1311,6 +1423,33 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 						  AND ost_token_type = \'access\'
 						  AND ost_usa_id_ref = %d
 						', $token, $user_id);
+		}
+	}
+
+
+	/**
+	 * Set the ttl of a consumer access token.  This is done when the
+	 * server receives a valid request with a xoauth_token_ttl parameter in it.
+	 * 
+	 * @param string token
+	 * @param int ttl
+	 */
+	public function setConsumerAccessTokenTtl ( $token, $token_ttl )
+	{
+		if ($token_ttl <= 0)
+		{
+			// Immediate delete when the token is past its ttl
+			$this->deleteConsumerAccessToken($token, 0, true);
+		}
+		else
+		{
+			// Set maximum time to live for this token
+			$this->query('
+						UPDATE oauth_server_token
+						SET ost_token_ttl = DATE_ADD(NOW(), INTERVAL %d SECOND)
+						WHERE ost_token 	 = \'%s\'
+						  AND ost_token_type = \'access\'
+						', $token_ttl, $token);
 		}
 	}
 
@@ -1370,6 +1509,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 					ON ost_osr_id_ref = osr_id
 				WHERE ost_usa_id_ref = %d
 				  AND ost_token_type = \'access\'
+				  AND ost_token_ttl  >= NOW()
 				ORDER BY osr_application_title
 				', $user_id);
 		return $rs;

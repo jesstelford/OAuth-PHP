@@ -33,8 +33,8 @@ abstract class OAuthStoreAbstract
 {
 	abstract public function getSecretsForVerify ( $consumer_key, $token, $token_type = 'access' );
 	abstract public function getSecretsForSignature ( $uri, $user_id );
-	abstract public function getServerTokenSecrets ( $consumer_key, $token, $token_type, $user_id );
-	abstract public function addServerToken ( $consumer_key, $token_type, $token, $token_secret, $user_id );
+	abstract public function getServerTokenSecrets ( $consumer_key, $token, $token_type, $user_id, $name = '' );
+	abstract public function addServerToken ( $consumer_key, $token_type, $token, $token_secret, $user_id, $options = array() );
 
 	abstract public function deleteServer ( $consumer_key, $user_id, $user_is_admin = false );
 	abstract public function getServer( $consumer_key, $user_id, $user_is_admin = false );
@@ -51,15 +51,16 @@ abstract class OAuthStoreAbstract
 	abstract public function getConsumer ( $consumer_key, $user_id, $user_is_admin = false );
 	abstract public function getConsumerStatic ();
 
-	abstract public function addConsumerRequestToken ( $consumer_key );
+	abstract public function addConsumerRequestToken ( $consumer_key, $options = array() );
 	abstract public function getConsumerRequestToken ( $token );
 	abstract public function deleteConsumerRequestToken ( $token );
 	abstract public function authorizeConsumerRequestToken ( $token, $user_id, $referrer_host = '' );
 	abstract public function countConsumerAccessTokens ( $consumer_key );
-	abstract public function exchangeConsumerRequestForAccessToken ( $token );
+	abstract public function exchangeConsumerRequestForAccessToken ( $token, $options = array() );
 	abstract public function getConsumerAccessToken ( $token, $user_id );
 	abstract public function deleteConsumerAccessToken ( $token, $user_id, $user_is_admin = false );
-
+	abstract public function setConsumerAccessTokenTtl ( $token, $ttl );
+	
 	abstract public function listConsumers ( $user_id );
 	abstract public function listConsumerTokens ( $user_id );
 

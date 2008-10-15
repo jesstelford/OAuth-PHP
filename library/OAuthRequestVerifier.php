@@ -170,6 +170,13 @@ class OAuthRequestVerifier extends OAuthRequest
 			{
 				$user_id = $secrets['user_id'];
 			}
+			
+			// Check if the consumer wants us to reset the ttl of this token
+			$ttl = $this->getParam('xoauth_token_ttl', true);
+			if (is_numeric($ttl))
+			{
+				$this->store->setConsumerAccessTokenTtl($this->urldecode($token), $ttl);
+			}
 		}
 		else
 		{

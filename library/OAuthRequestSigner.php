@@ -98,16 +98,17 @@ class OAuthRequestSigner extends OAuthRequest
 	 * 
 	 * @param int usr_id		(optional) user that wants to sign this request
 	 * @param array secrets		secrets used for signing, when empty then secrets will be fetched from the token registry
+	 * @param string name		name of the token to be used for signing
 	 * @exception OAuthException when there is no oauth relation with the server
 	 * @exception OAuthException when we don't support the signing methods of the server
 	 */	
-	function sign ( $usr_id = 0, $secrets = null )
+	function sign ( $usr_id = 0, $secrets = null, $name = '' )
 	{
 		$url = $this->getRequestUrl();
 		if (empty($secrets))
 		{
 			// get the access tokens for the site (on an user by user basis)
-			$secrets = $this->store->getSecretsForSignature($url, $usr_id);
+			$secrets = $this->store->getSecretsForSignature($url, $usr_id, $name);
 		}
 		if (empty($secrets))
 		{
