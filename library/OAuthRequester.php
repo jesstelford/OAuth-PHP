@@ -220,11 +220,11 @@ class OAuthRequester extends OAuthRequestSigner
 	{
 		OAuthRequestLogger::start();
 
-		$store	= OAuthStore::instance();
-		$r		= $store->getServerTokenSecrets($consumer_key, $token, 'request', $usr_id);
-		$uri 	= $r['access_token_uri'];
-		$name	= $r['token_name'];
-		
+		$store	    = OAuthStore::instance();
+		$r		    = $store->getServerTokenSecrets($consumer_key, $token, 'request', $usr_id);
+		$uri 	    = $r['access_token_uri'];
+		$token_name	= $r['token_name'];
+
 		// Delete the server request token, this one was for one use only
 		$store->deleteServerToken($consumer_key, $r['token'], 0, true);
 
@@ -262,7 +262,7 @@ class OAuthRequester extends OAuthRequestSigner
 		if (!empty($token['oauth_token']) && !empty($token['oauth_token_secret']))
 		{
 			$opts         = array();
-			$opts['name'] = $name;
+			$opts['name'] = $token_name;
 			if (isset($token['xoauth_token_ttl']))
 			{
 				$opts['token_ttl'] = $token['xoauth_token_ttl'];
