@@ -593,7 +593,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 					  AND oct_usa_id_ref   = %d
 					  AND oct_token_type   = \'access\'
 					  AND oct_token        = \'%s\'
-					  AND oct_ttl          >= NOW()
+					  AND oct_token_ttl    >= NOW()
 					', $consumer_key, $user_id, $token);
 		
 		if (empty($ts))
