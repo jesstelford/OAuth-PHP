@@ -107,7 +107,7 @@ class OAuthRequestLogger
 				{
 					ob_end_flush();
 				}
-				else
+				elseif (ob_get_level())
 				{
 					ob_end_clean();
 				}
