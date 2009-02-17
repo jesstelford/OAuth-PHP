@@ -1349,7 +1349,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		}
 
 		$ret = array('token' => $new_token, 'token_secret' => $new_secret);
-		$ttl = any_db_query_one('
+		$ttl = $this->query_one('
 					SELECT	IF(ost_token_ttl >= \'9999-12-31\', NULL, UNIX_TIMESTAMP(ost_token_ttl) - UNIX_TIMESTAMP(NOW())) as token_ttl
 					FROM oauth_server_token
 					WHERE ost_token = \'%s\'', $new_token);
