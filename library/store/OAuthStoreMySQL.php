@@ -92,6 +92,11 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 				$this->conn = mysql_connect();
 			}
 
+			if ($this->conn === false)
+			{
+				throw new OAuthException('Could not connect to MySQL database: ' . mysql_error());
+			}
+
 			if (isset($options['database']))
 			{
 				if (!mysql_select_db($options['database'], $this->conn))
@@ -1862,9 +1867,8 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	{
 		if (mysql_errno($this->conn))
 		{
-			echo "SQL Error in OAuthStoreMySQL: ".mysql_error($this->conn)."\n\n";
-			echo $sql;
-			die();
+			$msg =  "SQL Error in OAuthStoreMySQL: ".mysql_error($this->conn)."\n\n" . $sql;
+			throw new OAuthException($msg);
 		}
 	}
 }
