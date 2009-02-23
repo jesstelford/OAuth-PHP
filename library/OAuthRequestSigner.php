@@ -165,7 +165,7 @@ class OAuthRequestSigner extends OAuthRequest
 				$h[] = $name.'="'.$value.'"';
 			}
 		}
-		$hs = implode($h, ",\r\n    ");
+		$hs = implode(', ', $h);
 		return $hs;
 	}
 
