@@ -378,7 +378,10 @@ class OAuthRequester extends OAuthRequestSigner
 			}
 			else
 			{
-				$url .= '?'.$query;
+				if (!empty($query))
+				{
+					$url .= '?'.$query;
+				}
 				if ($method != 'GET')
 				{
 					curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
