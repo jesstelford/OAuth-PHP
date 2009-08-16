@@ -1119,7 +1119,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		}
 		$c['user_id'] = $c['usa_id_ref'];
 
-		if (!$user_is_admin && !empty($r['user_id']) && $r['user_id'] != $user_id)
+		if (!$user_is_admin && !empty($c['user_id']) && $c['user_id'] != $user_id)
 		{
 			throw new OAuthException('No access to the consumer information for consumer_key "'.$consumer_key.'"');
 		}
