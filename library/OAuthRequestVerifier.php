@@ -40,6 +40,7 @@ class OAuthRequestVerifier extends OAuthRequest
 {
 	private $request;
 	private $store;
+	private $accepted_signatures = null;
 	
 	/**
 	 * Construct the request to be verified
@@ -154,6 +155,10 @@ class OAuthRequestVerifier extends OAuthRequest
 				{
 					$method = $this->getParam('oauth_signature_method');
 				}
+				if (is_array($this->accepted_signatures) and !in_array($method, $this->accepted_signatures)) 
+				{
+					throw new OAuthException2('Unaccepted signature method.');
+				}
 
 				try
 				{
@@ -254,6 +259,18 @@ class OAuthRequestVerifier extends OAuthRequest
 		}
 	}
 
+	/**
+	 * 
+	 * @param array $accepted The array of accepted signature methods, or if null is passed 
+	 * all supported methods are accepted and there is no filtering.
+	 * 
+	 */
+	public function setAcceptedSignatureMethods($accepted = null) {
+		if (is_array($accepted))
+			$this->accepted_signatures = $accepted;
+		else if ($accepted == null)
+			$this->accepted_signatures = null;
+	}
 }
 
 
