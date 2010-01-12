@@ -94,7 +94,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 
 			if ($this->conn === false)
 			{
-				throw new OAuthException('Could not connect to MySQL database: ' . mysql_error());
+				throw new OAuthException2('Could not connect to MySQL database: ' . mysql_error());
 			}
 
 			if (isset($options['database']))
@@ -116,7 +116,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string consumer_key
 	 * @param string token
 	 * @param string token_type		false, 'request' or 'access'
-	 * @exception OAuthException when no secrets where found
+	 * @exception OAuthException2 when no secrets where found
 	 * @return array	assoc (consumer_secret, token_secret, osr_id, ost_id, user_id)
 	 */
 	public function getSecretsForVerify ( $consumer_key, $token, $token_type = 'access' )
@@ -165,7 +165,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		
 		if (empty($rs))
 		{
-			throw new OAuthException('The consumer_key "'.$consumer_key.'" token "'.$token.'" combination does not exist or is not enabled.');
+			throw new OAuthException2('The consumer_key "'.$consumer_key.'" token "'.$token.'" combination does not exist or is not enabled.');
 		}
 		return $rs;
 	}
@@ -189,7 +189,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string uri	uri of the server
 	 * @param int user_id	id of the logged on user
 	 * @param string name	(optional) name of the token (case sensitive)
-	 * @exception OAuthException when no credentials found
+	 * @exception OAuthException2 when no credentials found
 	 * @return array
 	 */
 	public function getSecretsForSignature ( $uri, $user_id, $name = '' )
@@ -227,7 +227,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		
 		if (empty($secrets))
 		{
-			throw new OAuthException('No server tokens available for '.$uri);
+			throw new OAuthException2('No server tokens available for '.$uri);
 		}
 		$secrets['signature_methods'] = explode(',', $secrets['signature_methods']);
 		return $secrets;
@@ -242,14 +242,14 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string	token_type
 	 * @param int		user_id			the user owning the token
 	 * @param string	name			optional name for a named token
-	 * @exception OAuthException when no credentials found
+	 * @exception OAuthException2 when no credentials found
 	 * @return array
 	 */
 	public function getServerTokenSecrets ( $consumer_key, $token, $token_type, $user_id, $name = '' )
 	{
 		if ($token_type != 'request' && $token_type != 'access')
 		{
-			throw new OAuthException('Unkown token type "'.$token_type.'", must be either "request" or "access"');
+			throw new OAuthException2('Unkown token type "'.$token_type.'", must be either "request" or "access"');
 		}
 
 		// Take the most recent token of the given type
@@ -278,7 +278,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 					
 		if (empty($r))
 		{
-			throw new OAuthException('Could not find a "'.$token_type.'" token for consumer "'.$consumer_key.'" and user '.$user_id);
+			throw new OAuthException2('Could not find a "'.$token_type.'" token for consumer "'.$consumer_key.'" and user '.$user_id);
 		}
 		if (isset($r['signature_methods']) && !empty($r['signature_methods']))
 		{
@@ -302,14 +302,14 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string token_secret
 	 * @param int 	 user_id			the user owning the token
 	 * @param array  options			extra options, name and token_ttl
-	 * @exception OAuthException when server is not known
-	 * @exception OAuthException when we received a duplicate token
+	 * @exception OAuthException2 when server is not known
+	 * @exception OAuthException2 when we received a duplicate token
 	 */
 	public function addServerToken ( $consumer_key, $token_type, $token, $token_secret, $user_id, $options = array() )
 	{
 		if ($token_type != 'request' && $token_type != 'access')
 		{
-			throw new OAuthException('Unknown token type "'.$token_type.'", must be either "request" or "access"');
+			throw new OAuthException2('Unknown token type "'.$token_type.'", must be either "request" or "access"');
 		}
 
 		// Maximum time to live for this token
@@ -334,7 +334,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 					
 		if (empty($ocr_id))
 		{
-			throw new OAuthException('No server associated with consumer_key "'.$consumer_key.'"');
+			throw new OAuthException2('No server associated with consumer_key "'.$consumer_key.'"');
 		}
 		
 		// Named tokens, unique per user/consumer key
@@ -381,7 +381,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		
 		if (!$this->query_affected_rows())
 		{
-			throw new OAuthException('Received duplicate token "'.$token.'" for the same consumer_key "'.$consumer_key.'"');
+			throw new OAuthException2('Received duplicate token "'.$token.'" for the same consumer_key "'.$consumer_key.'"');
 		}
 	}
 
@@ -420,7 +420,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string consumer_key
 	 * @param int user_id
 	 * @param boolean user_is_admin (optional)
-	 * @exception OAuthException when server is not found
+	 * @exception OAuthException2 when server is not found
 	 * @return array
 	 */	
 	public function getServer ( $consumer_key, $user_id, $user_is_admin = false )
@@ -442,7 +442,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		
 		if (empty($r))
 		{
-			throw new OAuthException('No server with consumer_key "'.$consumer_key.'" has been registered (for this user)');
+			throw new OAuthException2('No server with consumer_key "'.$consumer_key.'" has been registered (for this user)');
 		}
 			
 		if (isset($r['signature_methods']) && !empty($r['signature_methods']))
@@ -465,7 +465,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * 
 	 * @param string uri	uri of the server
 	 * @param int user_id	id of the logged on user
-	 * @exception OAuthException when no credentials found
+	 * @exception OAuthException2 when no credentials found
 	 * @return array
 	 */
 	public function getServerForUri ( $uri, $user_id )
@@ -502,7 +502,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		
 		if (empty($server))
 		{
-			throw new OAuthException('No server available for '.$uri);
+			throw new OAuthException2('No server available for '.$uri);
 		}
 		$server['signature_methods'] = explode(',', $server['signature_methods']);
 		return $server;
@@ -572,7 +572,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string consumer_key
 	 * @param string token
 	 * @param int user_id
-	 * @exception OAuthException when no such token found
+	 * @exception OAuthException2 when no such token found
 	 * @return array
 	 */
 	public function getServerToken ( $consumer_key, $token, $user_id )
@@ -603,7 +603,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		
 		if (empty($ts))
 		{
-			throw new OAuthException('No such consumer key ('.$consumer_key.') and token ('.$token.') combination for user "'.$user_id.'"');
+			throw new OAuthException2('No such consumer key ('.$consumer_key.') and token ('.$token.') combination for user "'.$user_id.'"');
 		}
 		return $ts;
 	}
@@ -736,7 +736,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param array server
 	 * @param int user_id	user registering this server
 	 * @param boolean user_is_admin
-	 * @exception OAuthException when fields are missing or on duplicate consumer_key
+	 * @exception OAuthException2 when fields are missing or on duplicate consumer_key
 	 * @return consumer_key
 	 */
 	public function updateServer ( $server, $user_id, $user_is_admin = false )
@@ -745,7 +745,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		{
 			if (empty($server[$f]))
 			{
-				throw new OAuthException('The field "'.$f.'" must be set and non empty');
+				throw new OAuthException2('The field "'.$f.'" must be set and non empty');
 			}
 		}
 		
@@ -771,7 +771,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 
 		if ($exists)
 		{
-			throw new OAuthException('The server with key "'.$server['consumer_key'].'" has already been registered');
+			throw new OAuthException2('The server with key "'.$server['consumer_key'].'" has already been registered');
 		}
 
 		$parts = parse_url($server['server_uri']);
@@ -820,7 +820,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 				
 				if ($ocr_usa_id_ref != $user_id)
 				{
-					throw new OAuthException('The user "'.$user_id.'" is not allowed to update this server');
+					throw new OAuthException2('The user "'.$user_id.'" is not allowed to update this server');
 				}
 			}
 			
@@ -912,7 +912,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 			{
 				if (empty($consumer[$f]))
 				{
-					throw new OAuthException('The field "'.$f.'" must be set and non empty');
+					throw new OAuthException2('The field "'.$f.'" must be set and non empty');
 				}
 			}
 		}
@@ -921,11 +921,11 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		{
 			if (empty($consumer['consumer_key']))
 			{
-				throw new OAuthException('The field "consumer_key" must be set and non empty');
+				throw new OAuthException2('The field "consumer_key" must be set and non empty');
 			}
 			if (!$user_is_admin && empty($consumer['consumer_secret']))
 			{
-				throw new OAuthException('The field "consumer_secret" must be set and non empty');
+				throw new OAuthException2('The field "consumer_secret" must be set and non empty');
 			}
 
 			// Check if the current user can update this server definition
@@ -939,7 +939,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 				
 				if ($osr_usa_id_ref != $user_id)
 				{
-					throw new OAuthException('The user "'.$user_id.'" is not allowed to update this consumer');
+					throw new OAuthException2('The user "'.$user_id.'" is not allowed to update this consumer');
 				}
 			}
 			else
@@ -1096,7 +1096,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string consumer_key
 	 * @param int user_id
 	 * @param boolean user_is_admin (optional)
-	 * @exception OAuthException when consumer not found
+	 * @exception OAuthException2 when consumer not found
 	 * @return array
 	 */
 	public function getConsumer ( $consumer_key, $user_id, $user_is_admin = false )
@@ -1109,7 +1109,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		
 		if (!is_array($consumer))
 		{
-			throw new OAuthException('No consumer with consumer_key "'.$consumer_key.'"');
+			throw new OAuthException2('No consumer with consumer_key "'.$consumer_key.'"');
 		}
 
 		$c = array();
@@ -1121,7 +1121,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 
 		if (!$user_is_admin && !empty($c['user_id']) && $c['user_id'] != $user_id)
 		{
-			throw new OAuthException('No access to the consumer information for consumer_key "'.$consumer_key.'"');
+			throw new OAuthException2('No access to the consumer information for consumer_key "'.$consumer_key.'"');
 		}
 		return $c;
 	}
@@ -1194,7 +1194,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 
 		if (!$osr_id)
 		{
-			throw new OAuthException('No server with consumer_key "'.$consumer_key.'" or consumer_key is disabled');
+			throw new OAuthException2('No server with consumer_key "'.$consumer_key.'" or consumer_key is disabled');
 		}
 
 		if (isset($options['token_ttl']) && is_numeric($options['token_ttl']))
@@ -1317,7 +1317,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * 
 	 * @param string token
 	 * @param array options		options for the token, token_ttl
-	 * @exception OAuthException when token could not be exchanged
+	 * @exception OAuthException2 when token could not be exchanged
 	 * @return array (token, token_secret)
 	 */
 	public function exchangeConsumerRequestForAccessToken ( $token, $options = array() )
@@ -1350,7 +1350,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		
 		if ($this->query_affected_rows() != 1)
 		{
-			throw new OAuthException('Can\'t exchange request token "'.$token.'" for access token. No such token or not authorized');
+			throw new OAuthException2('Can\'t exchange request token "'.$token.'" for access token. No such token or not authorized');
 		}
 
 		$ret = array('token' => $new_token, 'token_secret' => $new_secret);
@@ -1372,7 +1372,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * 
 	 * @param string token
 	 * @param int user_id
-	 * @exception OAuthException when token is not found
+	 * @exception OAuthException2 when token is not found
 	 * @return array  token and consumer details
 	 */
 	public function getConsumerAccessToken ( $token, $user_id )
@@ -1385,7 +1385,8 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 						osr_consumer_secret		as consumer_secret,
 						osr_application_uri		as application_uri,
 						osr_application_title	as application_title,
-						osr_application_descr	as application_descr
+						osr_application_descr	as application_descr,
+						osr_callback_uri		as callback_uri
 				FROM oauth_server_token
 						JOIN oauth_server_registry
 						ON ost_osr_id_ref = osr_id
@@ -1397,7 +1398,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		
 		if (empty($rs))
 		{
-			throw new OAuthException('No server_token "'.$token.'" for user "'.$user_id.'"');
+			throw new OAuthException2('No server_token "'.$token.'" for user "'.$user_id.'"');
 		}
 		return $rs;
 	}
@@ -1480,7 +1481,8 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 						osr_application_title	as application_title,
 						osr_application_descr	as application_descr,
 						osr_requester_name		as requester_name,
-						osr_requester_email		as requester_email
+						osr_requester_email		as requester_email,
+						osr_callback_uri		as callback_uri
 				FROM oauth_server_registry
 				WHERE (osr_usa_id_ref = %d OR osr_usa_id_ref IS NULL)
 				ORDER BY osr_application_title
@@ -1508,7 +1510,8 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 						ost_timestamp			as timestamp,	
 						ost_token				as token,
 						ost_token_secret		as token_secret,
-						ost_referrer_host		as token_referrer_host
+						ost_referrer_host		as token_referrer_host,
+						osr_callback_uri		as callback_uri
 				FROM oauth_server_registry
 					JOIN oauth_server_token
 					ON ost_osr_id_ref = osr_id
@@ -1529,7 +1532,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * @param string 	token
 	 * @param int		timestamp
 	 * @param string 	nonce
-	 * @exception OAuthException	thrown when the timestamp is not in sequence or nonce is not unique
+	 * @exception OAuthException2	thrown when the timestamp is not in sequence or nonce is not unique
 	 */
 	public function checkServerNonce ( $consumer_key, $token, $timestamp, $nonce )
 	{
@@ -1542,7 +1545,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 
 		if (!empty($r) && $r[1])
 		{
-			throw new OAuthException('Timestamp is out of sequence. Request rejected. Got '.$timestamp.' last max is '.$r[0].' allowed skew is '.$this->max_timestamp_skew);
+			throw new OAuthException2('Timestamp is out of sequence. Request rejected. Got '.$timestamp.' last max is '.$r[0].' allowed skew is '.$this->max_timestamp_skew);
 		}
 		
 		// Insert the new combination
@@ -1556,7 +1559,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		
 		if ($this->query_affected_rows() == 0)
 		{
-			throw new OAuthException('Duplicate timestamp/nonce combination, possible replay attack.  Request rejected.');
+			throw new OAuthException2('Duplicate timestamp/nonce combination, possible replay attack.  Request rejected.');
 		}
 
 		// Clean up all timestamps older than the one we just received
@@ -1868,7 +1871,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		if (mysql_errno($this->conn))
 		{
 			$msg =  "SQL Error in OAuthStoreMySQL: ".mysql_error($this->conn)."\n\n" . $sql;
-			throw new OAuthException($msg);
+			throw new OAuthException2($msg);
 		}
 	}
 }
