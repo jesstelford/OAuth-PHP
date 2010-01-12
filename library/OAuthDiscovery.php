@@ -32,7 +32,7 @@
 
 require_once dirname(__FILE__).'/discovery/xrds_parse.php';
 
-require_once dirname(__FILE__).'/OAuthException.php';
+require_once dirname(__FILE__).'/OAuthException2.php';
 require_once dirname(__FILE__).'/OAuthRequestLogger.php';
 
 
@@ -56,12 +56,12 @@ class OAuthDiscovery
 			$xrds = xrds_parse($xrds_file);
 			if (empty($xrds))
 			{
-				throw new OAuthException('Could not discover OAuth information for '.$uri);
+				throw new OAuthException2('Could not discover OAuth information for '.$uri);
 			}
 		}
 		else
 		{
-			throw new OAuthException('Could not discover XRDS file at '.$uri);
+			throw new OAuthException2('Could not discover XRDS file at '.$uri);
 		}
 
 		// Fill an OAuthServer record for the uri found

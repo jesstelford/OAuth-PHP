@@ -75,7 +75,7 @@ class OAuthRequester extends OAuthRequestSigner
 			{
 				if (!is_null($body))
 				{
-					throw new OAuthException('When sending files, you can\'t send a body as well.');
+					throw new OAuthException2('When sending files, you can\'t send a body as well.');
 				}
 				$this->files = $files;
 			}
@@ -89,8 +89,8 @@ class OAuthRequester extends OAuthRequestSigner
 	 * @param int usr_id			optional user id for which we make the request
 	 * @param array curl_options	optional extra options for curl request
 	 * @param array options			options like name and token_ttl
-	 * @exception OAuthException when authentication not accepted
-	 * @exception OAuthException when signing was not possible
+	 * @exception OAuthException2 when authentication not accepted
+	 * @exception OAuthException2 when signing was not possible
 	 * @return array (code=>int, headers=>array(), body=>string)
 	 */
 	function doRequest ( $usr_id = 0, $curl_options = array(), $options = array() )
@@ -114,7 +114,7 @@ class OAuthRequester extends OAuthRequestSigner
 		$result = $this->curl_parse($text);	
 		if ($result['code'] >= 400)
 		{
-			throw new OAuthException('Request failed with code ' . $result['code'] . ': ' . $result['body']);
+			throw new OAuthException2('Request failed with code ' . $result['code'] . ': ' . $result['body']);
 		}
 
 		// Record the token time to live for this server access token, immediate delete iff ttl <= 0
@@ -137,8 +137,8 @@ class OAuthRequester extends OAuthRequestSigner
 	 * @param array params (optional) extra arguments for when requesting the request token
 	 * @param string method (optional) change the method of the request, defaults to POST (as it should be)
 	 * @param array options (optional) options like name and token_ttl
-	 * @exception OAuthException when no key could be fetched
-	 * @exception OAuthException when no server with consumer_key registered
+	 * @exception OAuthException2 when no key could be fetched
+	 * @exception OAuthException2 when no server with consumer_key registered
 	 * @return array (authorize_uri, token)
 	 */
 	static function requestRequestToken ( $consumer_key, $usr_id, $params = null, $method = 'POST', $options = array() )
@@ -160,12 +160,12 @@ class OAuthRequester extends OAuthRequestSigner
 
 		if (empty($text))
 		{
-			throw new OAuthException('No answer from the server "'.$uri.'" while requesting a request token');
+			throw new OAuthException2('No answer from the server "'.$uri.'" while requesting a request token');
 		}
 		$data	= $oauth->curl_parse($text);
 		if ($data['code'] != 200)
 		{
-			throw new OAuthException('Unexpected result from the server "'.$uri.'" ('.$data['code'].') while requesting a request token');
+			throw new OAuthException2('Unexpected result from the server "'.$uri.'" ('.$data['code'].') while requesting a request token');
 		}
 		$token  = array();
 		$params = explode('&', $data['body']);
@@ -190,7 +190,7 @@ class OAuthRequester extends OAuthRequestSigner
 		}
 		else
 		{
-			throw new OAuthException('The server "'.$uri.'" did not return the oauth_token or the oauth_token_secret');
+			throw new OAuthException2('The server "'.$uri.'" did not return the oauth_token or the oauth_token_secret');
 		}
 
 		OAuthRequestLogger::flush();
@@ -213,8 +213,8 @@ class OAuthRequester extends OAuthRequestSigner
 	 * @param int usr_id		user requesting the access token
 	 * @param string method (optional) change the method of the request, defaults to POST (as it should be)
 	 * @param array options (optional) extra options for request, eg token_ttl
-	 * @exception OAuthException when no key could be fetched
-	 * @exception OAuthException when no server with consumer_key registered
+	 * @exception OAuthException2 when no key could be fetched
+	 * @exception OAuthException2 when no server with consumer_key registered
 	 */
 	static function requestAccessToken ( $consumer_key, $token, $usr_id, $method = 'POST', $options = array() )
 	{
@@ -242,13 +242,13 @@ class OAuthRequester extends OAuthRequestSigner
 		$text	= $oauth->curl_raw();
 		if (empty($text))
 		{
-			throw new OAuthException('No answer from the server "'.$uri.'" while requesting a request token');
+			throw new OAuthException2('No answer from the server "'.$uri.'" while requesting a request token');
 		}
 		$data	= $oauth->curl_parse($text);
 
 		if ($data['code'] != 200)
 		{
-			throw new OAuthException('Unexpected result from the server "'.$uri.'" ('.$data['code'].') while requesting a request token');
+			throw new OAuthException2('Unexpected result from the server "'.$uri.'" ('.$data['code'].') while requesting a request token');
 		}
 
 		$token  = array();
@@ -271,7 +271,7 @@ class OAuthRequester extends OAuthRequestSigner
 		}
 		else
 		{
-			throw new OAuthException('The server "'.$uri.'" did not return the oauth_token or the oauth_token_secret');
+			throw new OAuthException2('The server "'.$uri.'" did not return the oauth_token or the oauth_token_secret');
 		}
 
 		OAuthRequestLogger::flush();
@@ -283,7 +283,7 @@ class OAuthRequester extends OAuthRequestSigner
 	 * Open and close a curl session passing all the options to the curl libs
 	 * 
 	 * @param string url the http address to fetch
-	 * @exception OAuthException when temporary file for PUT operation could not be created
+	 * @exception OAuthException2 when temporary file for PUT operation could not be created
 	 * @return string the result of the curl action
 	 */
 	protected function curl_raw ( $opts = array() )
@@ -317,7 +317,7 @@ class OAuthRequester extends OAuthRequestSigner
 		{
 			if ($method == 'TRACE')
 			{
-				throw new OAuthException('A body can not be sent with a TRACE operation');
+				throw new OAuthException2('A body can not be sent with a TRACE operation');
 			}
 
 			// PUT and POST allow a request body
@@ -347,7 +347,7 @@ class OAuthRequester extends OAuthRequestSigner
 				$put_file = @tmpfile();
 				if (!$put_file)
 				{
-					throw new OAuthException('Could not create tmpfile for PUT operation');
+					throw new OAuthException2('Could not create tmpfile for PUT operation');
 				}
 				fwrite($put_file, $body);
 				fseek($put_file, 0);

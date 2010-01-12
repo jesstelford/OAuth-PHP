@@ -32,7 +32,7 @@
  * THE SOFTWARE.
  */
 
-require_once dirname(__FILE__) . '/OAuthException.php';
+require_once dirname(__FILE__) . '/OAuthException2.php';
 
 class OAuthStore
 {
@@ -68,12 +68,12 @@ class OAuthStore
 				}
 				else
 				{
-					throw new OAuthException('Could not find class '.$class.' in file '.$file);
+					throw new OAuthException2('Could not find class '.$class.' in file '.$file);
 				}
 			}
 			else
 			{
-				throw new OAuthException('No OAuthStore for '.$store.' (file '.$file.')');
+				throw new OAuthException2('No OAuthStore for '.$store.' (file '.$file.')');
 			}
 	    }
 	    return OAuthStore::$instance;	

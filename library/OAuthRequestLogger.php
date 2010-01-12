@@ -206,7 +206,7 @@ class OAuthRequestLogger
 
 
 	/**
-	 * Add a note, used by the OAuthException to log all exceptions.
+	 * Add a note, used by the OAuthException2 to log all exceptions.
 	 * 
 	 * @param string note
 	 */

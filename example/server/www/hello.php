@@ -44,7 +44,7 @@ try
 		$authorized = true;
 	}
 }
-catch (OAuthException $e)
+catch (OAuthException2 $e)
 {
 }
 

@@ -76,7 +76,7 @@ class OAuthServer extends OAuthRequestVerifier
 
 			echo $result;
 		}
-		catch (OAuthException $e)
+		catch (OAuthException2 $e)
 		{
 			$request_token = false;
 
@@ -97,7 +97,7 @@ class OAuthServer extends OAuthRequestVerifier
 	 * 
 	 * Nota bene: this stores the current token, consumer key and callback in the _SESSION
 	 * 
-	 * @exception OAuthException thrown when not a valid request
+	 * @exception OAuthException2 thrown when not a valid request
 	 * @return array token description
 	 */
 	public function authorizeVerify ( )
@@ -109,7 +109,7 @@ class OAuthServer extends OAuthRequestVerifier
 		$rs    = $store->getConsumerRequestToken($token);
 		if (empty($rs))
 		{
-			throw new OAuthException('Unknown request token "'.$token.'"');
+			throw new OAuthException2('Unknown request token "'.$token.'"');
 		}
 
 		// We need to remember the callback		
@@ -214,7 +214,7 @@ class OAuthServer extends OAuthRequestVerifier
 
 			echo $result;
 		}
-		catch (OAuthException $e)
+		catch (OAuthException2 $e)
 		{
 			header('HTTP/1.1 401 Access Denied');
 			header('Content-Type: text/plain');

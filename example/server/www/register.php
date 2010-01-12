@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		echo 'Your consumer key is: <strong>' . $c['consumer_key'] . '</strong><br />';
 		echo 'Your consumer secret is: <strong>' . $c['consumer_secret'] . '</strong><br />';
 	}
-	catch (OAuthException $e)
+	catch (OAuthException2 $e)
 	{
 		echo '<strong>Error: ' . $e->getMessage() . '</strong><br />';
 	}

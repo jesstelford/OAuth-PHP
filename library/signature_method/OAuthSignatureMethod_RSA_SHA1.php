@@ -52,7 +52,7 @@ class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod
 		// (3) some sort of specific discovery code based on request
 		//
 		// either way should return a string representation of the certificate
-		throw OAuthException("OAuthSignatureMethod_RSA_SHA1::fetch_public_cert not implemented");
+		throw OAuthException2("OAuthSignatureMethod_RSA_SHA1::fetch_public_cert not implemented");
 	}
 	
 	
@@ -68,7 +68,7 @@ class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod
 		// (1) do a lookup in a table of trusted certs keyed off of consumer
 		//
 		// either way should return a string representation of the certificate
-		throw OAuthException("OAuthSignatureMethod_RSA_SHA1::fetch_private_cert not implemented");
+		throw OAuthException2("OAuthSignatureMethod_RSA_SHA1::fetch_private_cert not implemented");
 	}
 
 

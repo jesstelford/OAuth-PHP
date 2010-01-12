@@ -99,8 +99,8 @@ class OAuthRequestSigner extends OAuthRequest
 	 * @param int usr_id		(optional) user that wants to sign this request
 	 * @param array secrets		secrets used for signing, when empty then secrets will be fetched from the token registry
 	 * @param string name		name of the token to be used for signing
-	 * @exception OAuthException when there is no oauth relation with the server
-	 * @exception OAuthException when we don't support the signing methods of the server
+	 * @exception OAuthException2 when there is no oauth relation with the server
+	 * @exception OAuthException2 when we don't support the signing methods of the server
 	 */	
 	function sign ( $usr_id = 0, $secrets = null, $name = '' )
 	{
@@ -112,7 +112,7 @@ class OAuthRequestSigner extends OAuthRequest
 		}
 		if (empty($secrets))
 		{
-			throw new OAuthException('No OAuth relation with the server for at "'.$url.'"');
+			throw new OAuthException2('No OAuth relation with the server for at "'.$url.'"');
 		}
 
 		$signature_method = $this->selectSignatureMethod($secrets['signature_methods']);

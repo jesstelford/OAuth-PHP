@@ -31,7 +31,7 @@
  */
 
 
-require_once dirname(__FILE__) . '/OAuthException.php';
+require_once dirname(__FILE__) . '/OAuthException2.php';
 
 /**
  * Object to parse an incoming OAuth request or prepare an outgoing OAuth request
@@ -97,7 +97,7 @@ class OAuthRequest
 				// TODO: what to do with 'multipart/form-data'?
 				if ($this->getRequestContentType() == 'multipart/form-data')
 				{
-					throw new OAuthException('Unsupported POST content type, expected "application/x-www-form-urlencoded" got "'.@$_SERVER['CONTENT_TYPE'].'"');
+					throw new OAuthException2('Unsupported POST content type, expected "application/x-www-form-urlencoded" got "'.@$_SERVER['CONTENT_TYPE'].'"');
 				}
 				*/
 				if ($this->getRequestContentType() == 'application/x-www-form-urlencoded')
@@ -175,7 +175,7 @@ class OAuthRequest
 		{
 			if (!isset($this->param[$req]))
 			{
-				throw new OAuthException('Can\'t sign request, missing parameter "'.$req.'"');
+				throw new OAuthException2('Can\'t sign request, missing parameter "'.$req.'"');
 			}
 		}
 
@@ -195,7 +195,7 @@ class OAuthRequest
 	 * @param string	consumer_secret
 	 * @param string	token_secret
 	 * @param string 	signature_method
-	 * @exception OAuthException thrown when the signature method is unknown 
+	 * @exception OAuthException2 thrown when the signature method is unknown 
 	 * @return string signature
 	 */
 	function calculateDataSignature ( $data, $consumer_secret, $token_secret, $signature_method )
@@ -216,7 +216,7 @@ class OAuthRequest
 	 * 
 	 * @todo Let the signature method tell us how secure it is
 	 * @param array methods
-	 * @exception OAuthException when we don't support any method in the list
+	 * @exception OAuthException2 when we don't support any method in the list
 	 * @return string
 	 */
 	public function selectSignatureMethod ( $methods )
@@ -245,7 +245,7 @@ class OAuthRequest
 			
 			if (empty($method))
 			{
-				throw new OAuthException('None of the signing methods is supported.');
+				throw new OAuthException2('None of the signing methods is supported.');
 			}
 		}
 		return $method;
@@ -271,7 +271,7 @@ class OAuthRequest
 		}
 		else
 		{
-			throw new OAuthException('Unsupported signature method "'.$m.'".');
+			throw new OAuthException2('Unsupported signature method "'.$m.'".');
 		}
 		return $sig;
 	}
@@ -280,7 +280,7 @@ class OAuthRequest
 	/**
 	 * Perform some sanity checks.
 	 * 
-	 * @exception OAuthException thrown when sanity checks failed
+	 * @exception OAuthException2 thrown when sanity checks failed
 	 */
 	function checks ()
 	{
@@ -289,7 +289,7 @@ class OAuthRequest
 			$version = $this->urldecode($this->param['oauth_version']);
 			if ($version != '1.0')
 			{
-				throw new OAuthException('Expected OAuth version 1.0, got "'.$this->param['oauth_version'].'"');
+				throw new OAuthException2('Expected OAuth version 1.0, got "'.$this->param['oauth_version'].'"');
 			}
 		}
 	}
@@ -519,7 +519,7 @@ class OAuthRequest
 		$ps['host'] = mb_strtolower($ps['host']);
 		if (!preg_match('/^[a-z0-9\.\-]+$/', $ps['host']))
 		{
-			throw new OAuthException('Unsupported characters in host name');
+			throw new OAuthException2('Unsupported characters in host name');
 		}
 
 		// Get the port we are talking on
@@ -579,7 +579,7 @@ class OAuthRequest
 		case 'http':	return 80;
 		case 'https':	return 43;
 		default:
-			throw new OAuthException('Unsupported scheme type, expected http or https, got "'.$scheme.'"');
+			throw new OAuthException2('Unsupported scheme type, expected http or https, got "'.$scheme.'"');
 			break;
 		}
 	}
@@ -753,7 +753,7 @@ class OAuthRequest
 	 * 
 	 * @param string uri
 	 * @param array params		parameters, urlencoded
-	 * @exception OAuthException when redirect uri is illegal
+	 * @exception OAuthException2 when redirect uri is illegal
 	 */
 	public function redirect ( $uri, $params )
 	{
@@ -782,7 +782,7 @@ class OAuthRequest
 		{
 			if (strpos($uri, '://'))
 			{
-				throw new OAuthException('Illegal protocol in redirect uri '.$uri);
+				throw new OAuthException2('Illegal protocol in redirect uri '.$uri);
 			}
 			$uri = 'http://'.$uri;
 		}
