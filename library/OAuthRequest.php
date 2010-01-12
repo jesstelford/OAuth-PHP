@@ -509,7 +509,9 @@ class OAuthRequest
 		{
 			if (isset($_SERVER['HTTP_HOST']))
 			{
-				$ps['host'] = $_SERVER['HTTP_HOST'];
+				$ps_pre = parse_url($_SERVER['HTTP_HOST']);
+				$ps['host'] = $ps_pre['host'];
+				if(isset($ps_pre['port'])) $ps['port'] = $ps_pre['port'];
 			}
 			else
 			{

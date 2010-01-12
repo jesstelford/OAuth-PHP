@@ -32,7 +32,6 @@
  * THE SOFTWARE.
  */
 
-require_once dirname(__FILE__) . '/../../../../core/inc/any_database.inc.php';
 require_once dirname(__FILE__) . '/OAuthStoreMySQL.php';
 
 
