@@ -560,7 +560,10 @@ class OAuthRequest
 				foreach ($params as $p)
 				{
 					@list($name, $value) = explode('=', $p, 2);
-					$this->param[$name]  = $value;
+					if (strlen($name)) 
+					{
+						$this->param[$name]  = $value;
+					}
 				}
 			}
 		}
