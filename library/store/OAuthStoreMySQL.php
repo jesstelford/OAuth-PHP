@@ -317,7 +317,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 		{
 			$ttl = 'DATE_ADD(NOW(), INTERVAL '.intval($options['token_ttl']).' SECOND)';
 		}
-		else if ($token == 'request')
+		else if ($token_type == 'request')
 		{
 			$ttl = 'DATE_ADD(NOW(), INTERVAL '.$this->max_request_token_ttl.' SECOND)';
 		}
