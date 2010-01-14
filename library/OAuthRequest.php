@@ -492,7 +492,7 @@ class OAuthRequest
 	 */
 	protected function parseUri ( $parameters )
 	{
-		$ps = parse_url($this->uri);
+		$ps = @parse_url($this->uri);
 
 		// Get the current/requested method
 		if (empty($ps['scheme']))
