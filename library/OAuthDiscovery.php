@@ -164,8 +164,8 @@ class OAuthDiscovery
 			{
 				$xrds = $body;
 			}
-			else if (	preg_match('/^X-XRDS-Location:\s*(.*)$/im', $head, $m)
-					||	preg_match('/^Location:\s*(.*)$/im', $head, $m))
+			else if (	preg_match('/^X-XRDS-Location:\s*([^\r\n]*)/im', $head, $m)
+					||	preg_match('/^Location:\s*([^\r\n]*)/im', $head, $m))
 			{
 				// Recurse to the given location
 				if ($uri != $m[1])
