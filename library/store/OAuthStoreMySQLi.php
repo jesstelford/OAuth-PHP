@@ -80,7 +80,7 @@ class OAuthStoreMySQLi extends OAuthStoreMySQL
 
 			if ($this->conn === false)
 			{
-				throw new OAuthException22('Could not connect to MySQL database: ' . ((is_object($GLOBALS["___mysqli_ston"])) ? mysqli_error($GLOBALS["___mysqli_ston"]) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false)));
+				throw new OAuthException2('Could not connect to MySQL database: ' . ((is_object($GLOBALS["___mysqli_ston"])) ? mysqli_error($GLOBALS["___mysqli_ston"]) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false)));
 			}
 
 			if (isset($options['database']))
@@ -283,7 +283,7 @@ class OAuthStoreMySQLi extends OAuthStoreMySQL
 		if (((is_object($this->conn)) ? mysqli_errno($this->conn) : (($___mysqli_res = mysqli_connect_errno()) ? $___mysqli_res : false)))
 		{
 			$msg =  "SQL Error in OAuthStoreMySQL: ".((is_object($this->conn)) ? mysqli_error($this->conn) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false))."\n\n" . $sql;
-			throw new OAuthException22($msg);
+			throw new OAuthException2($msg);
 		}
 	}
 }
