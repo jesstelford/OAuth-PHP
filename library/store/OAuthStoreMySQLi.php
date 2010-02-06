@@ -41,6 +41,19 @@ require_once dirname(__FILE__) . '/OAuthStoreMySQL.php';
 
 class OAuthStoreMySQLi extends OAuthStoreMySQL
 {
+	
+	public function install() {
+		$sql = file_get_contents(dirname(__FILE__) . '/mysql/mysql.sql');
+		$ps  = explode('#--SPLIT--', $sql);
+		
+		foreach ($ps as $p)
+		{
+			$p = preg_replace('/^\s*#.*$/m', '', $p);
+			
+			$this->query($p);
+			$this->sql_errcheck($p);
+		}		
+	}
 
 	/**
 	 * Construct the OAuthStoreMySQLi.

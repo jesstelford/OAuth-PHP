@@ -4,9 +4,8 @@
  * Storage container for the oauth credentials, both server and consumer side.
  * Based on MySQL
  * 
- * @version $Id$
- * @author Marc Worrell <marcw@pobox.com>
- * @date  Nov 16, 2007 4:03:30 PM
+ * @version $Id: OAuthStoreMySQLi.php 64 2009-08-16 19:37:00Z marcw@pobox.com $
+ * @author Bruno Barberi Gnecco <brunobg@users.sf.net> Based on code by Marc Worrell <marcw@pobox.com>
  * 
  * 
  * The MIT License
@@ -32,27 +31,47 @@
  * THE SOFTWARE.
  */
 
+/*
+ * Modified from OAuthStoreMySQL to support MySQLi
+ */
 
 require_once dirname(__FILE__) . '/OAuthStoreAbstract.class.php';
+require_once dirname(__FILE__) . '/OAuthStoreMySQL.php';
 
 
-class OAuthStoreMySQL extends OAuthStoreSQL
+class OAuthStorePDO extends OAuthStoreMySQL
 {
-	/**
-	 * The MySQL connection 
-	 */
-	protected $conn;
+	private $conn; // PDO connection
+	private $lastaffectedrows;
 
 	/**
-	 * Initialise the database
+	 * Construct the OAuthStoreMySQLi.
+	 * In the options you have to supply either:
+	 * - dsn, username, password and database (for a new PDO connection)
+	 * - conn (for the connection to be used)
+	 * 
+	 * @param array options
 	 */
-	public function install ()
+	function __construct ( $options = array() )
 	{
-		require_once dirname(__FILE__) . '/mysql/install.php';
+		if (isset($options['conn']))
+		{
+			$this->conn = $options['conn'];
+		}
+		else if (isset($options['dsn']))
+		{
+			try 
+			{
+				$this->conn = new PDO($options['dsn'], $options['username'], @$options['password']);
+			}
+			catch (PDOException $e) 
+			{
+				throw new OAuthException2('Could not connect to PDO database: ' . $e->getMessage());
+			}
+
+			$this->query('set character set utf8');
+		}
 	}
-	
-	
-	/* ** Some simple helper functions for querying the mysql db ** */
 
 	/**
 	 * Perform a query, ignore the results
@@ -63,13 +82,16 @@ class OAuthStoreMySQL extends OAuthStoreSQL
 	protected function query ( $sql )
 	{
 		$sql = $this->sql_printf(func_get_args());
-		if (!($res = mysql_query($sql, $this->conn)))
+		try
+		{
+			$this->lastaffectedrows = $this->conn->exec($sql);
+			if ($this->lastaffectedrows === FALSE) {
+				$this->sql_errcheck($sql);
+			}
+		}
+		catch (PDOException $e) 
 		{
 			$this->sql_errcheck($sql);
-		}
-		if (is_resource($res))
-		{
-			mysql_free_result($res);
 		}
 	}
 	
@@ -83,17 +105,18 @@ class OAuthStoreMySQL extends OAuthStoreSQL
 	 */
 	protected function query_all_assoc ( $sql )
 	{
+		// TODO: finish
 		$sql = $this->sql_printf(func_get_args());
-		if (!($res = mysql_query($sql, $this->conn)))
+		if (!($res = mysqli_query( $this->conn, $sql)))
 		{
 			$this->sql_errcheck($sql);
 		}
 		$rs = array();
-		while ($row  = mysql_fetch_assoc($res))
+		while ($row  = mysqli_fetch_assoc($res))
 		{
 			$rs[] = $row;
 		}
-		mysql_free_result($res);
+		((mysqli_free_result($res) || (is_object($res) && (get_class($res) == "mysqli_result"))) ? true : false);
 		return $rs;
 	}
 	
@@ -107,12 +130,13 @@ class OAuthStoreMySQL extends OAuthStoreSQL
 	 */
 	protected function query_row_assoc ( $sql )
 	{
+		// TODO: test
 		$sql = $this->sql_printf(func_get_args());
-		if (!($res = mysql_query($sql, $this->conn)))
+		if (!($res = mysqli_query( $this->conn, $sql)))
 		{
 			$this->sql_errcheck($sql);
 		}
-		if ($row = mysql_fetch_assoc($res))
+		if ($row = mysqli_fetch_assoc($res))
 		{
 			$rs = $row;
 		}
@@ -120,7 +144,7 @@ class OAuthStoreMySQL extends OAuthStoreSQL
 		{
 			$rs = false;
 		}
-		mysql_free_result($res);
+		((mysqli_free_result($res) || (is_object($res) && (get_class($res) == "mysqli_result"))) ? true : false);
 		return $rs;
 	}
 
@@ -134,21 +158,17 @@ class OAuthStoreMySQL extends OAuthStoreSQL
 	 */
 	protected function query_row ( $sql )
 	{
+		// TODO: test
 		$sql = $this->sql_printf(func_get_args());
-		if (!($res = mysql_query($sql, $this->conn)))
+		try 
+		{
+			$row = $this->conn->query("select count(*) from table")->fetch(PDO::FETCH_ASSOC);
+		}
+		catch (PDOException $e)
 		{
 			$this->sql_errcheck($sql);
 		}
-		if ($row = mysql_fetch_array($res))
-		{
-			$rs = $row;
-		}
-		else
-		{
-			$rs = false;
-		}
-		mysql_free_result($res);
-		return $rs;
+		return $row;
 	}
 	
 		
@@ -161,13 +181,9 @@ class OAuthStoreMySQL extends OAuthStoreSQL
 	 */
 	protected function query_one ( $sql )
 	{
-		$sql = $this->sql_printf(func_get_args());
-		if (!($res = mysql_query($sql, $this->conn)))
-		{
-			$this->sql_errcheck($sql);
-		}
-		$val = @mysql_result($res, 0, 0);
-		mysql_free_result($res);
+		$sql = $this->sql_printf(func_get_args()); 
+		$row = $this->query_row($sql); 
+		$val = array_pop($row);
 		return $val;
 	}
 	
@@ -177,7 +193,7 @@ class OAuthStoreMySQL extends OAuthStoreSQL
 	 */
 	protected function query_affected_rows ()
 	{
-		return mysql_affected_rows($this->conn);
+		return $this->lastaffectedrows;
 	}
 
 
@@ -188,7 +204,7 @@ class OAuthStoreMySQL extends OAuthStoreSQL
 	 */
 	protected function query_insert_id ()
 	{
-		return mysql_insert_id($this->conn);
+		return $this->conn->lastInsertId();
 	}
 	
 	
@@ -208,7 +224,7 @@ class OAuthStoreMySQL extends OAuthStoreSQL
 	{
 		if (is_string($s))
 		{
-			return mysql_real_escape_string($s, $this->conn);
+			return $this->conn->quote($s);
 		}
 		else if (is_null($s))
 		{
@@ -224,18 +240,15 @@ class OAuthStoreMySQL extends OAuthStoreSQL
 		}
 		else
 		{
-			return mysql_real_escape_string(strval($s), $this->conn);
+			return $this->conn->quote(strval($s));
 		}
 	}
 	
 	
 	protected function sql_errcheck ( $sql )
 	{
-		if (mysql_errno($this->conn))
-		{
-			$msg =  "SQL Error in OAuthStoreMySQL: ".mysql_error($this->conn)."\n\n" . $sql;
-			throw new OAuthException2($msg);
-		}
+		$msg =  "SQL Error in OAuthStoreMySQL: ". print_r($this->conn->errorInfo(), true) ."\n\n" . $sql;
+		throw new OAuthException2($msg);
 	}
 }
 
