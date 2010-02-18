@@ -100,19 +100,20 @@ class OAuthStorePDO extends OAuthStoreSQL
 	 */
 	protected function query_all_assoc ( $sql )
 	{
-		// TODO: finish
 		$sql = $this->sql_printf(func_get_args());
-		if (!($res = mysqli_query( $this->conn, $sql)))
+		$result = array();
+
+		try 
+		{
+			$stmt = $this->conn->query($sql);
+			
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		}
+		catch (PDOException $e) 
 		{
 			$this->sql_errcheck($sql);
 		}
-		$rs = array();
-		while ($row  = mysqli_fetch_assoc($res))
-		{
-			$rs[] = $row;
-		}
-		((mysqli_free_result($res) || (is_object($res) && (get_class($res) == "mysqli_result"))) ? true : false);
-		return $rs;
+		return $result;
 	}
 	
 	
@@ -125,22 +126,10 @@ class OAuthStorePDO extends OAuthStoreSQL
 	 */
 	protected function query_row_assoc ( $sql )
 	{
-		// TODO: test
 		$sql = $this->sql_printf(func_get_args());
-		if (!($res = mysqli_query( $this->conn, $sql)))
-		{
-			$this->sql_errcheck($sql);
-		}
-		if ($row = mysqli_fetch_assoc($res))
-		{
-			$rs = $row;
-		}
-		else
-		{
-			$rs = false;
-		}
-		((mysqli_free_result($res) || (is_object($res) && (get_class($res) == "mysqli_result"))) ? true : false);
-		return $rs;
+		$result = $this->query_all_assoc($sql);
+		$val = array_pop($result);
+		return $val;
 	}
 
 	
