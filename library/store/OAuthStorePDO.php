@@ -38,7 +38,7 @@
 require_once dirname(__FILE__) . '/OAuthStoreSQL.class.php';
 
 
-class OAuthStorePDO extends OAuthStoreMySQL
+class OAuthStorePDO extends OAuthStoreSQL
 {
 	private $conn; // PDO connection
 	private $lastaffectedrows;
