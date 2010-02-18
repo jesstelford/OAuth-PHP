@@ -4,7 +4,7 @@
  * Storage container for the oauth credentials, both server and consumer side.
  * Based on MySQL
  * 
- * @version $Id: OAuthStoreMySQLi.php 64 2009-08-16 19:37:00Z marcw@pobox.com $
+ * @version $Id: OAuthStorePDO.php 64 2009-08-16 19:37:00Z marcw@pobox.com $
  * @author Bruno Barberi Gnecco <brunobg@users.sf.net> Based on code by Marc Worrell <marcw@pobox.com>
  * 
  * 
@@ -31,10 +31,6 @@
  * THE SOFTWARE.
  */
 
-/*
- * Modified from OAuthStoreMySQL to support MySQLi
- */
-
 require_once dirname(__FILE__) . '/OAuthStoreSQL.class.php';
 
 
@@ -44,7 +40,7 @@ class OAuthStorePDO extends OAuthStoreSQL
 	private $lastaffectedrows;
 
 	/**
-	 * Construct the OAuthStoreMySQLi.
+	 * Construct the OAuthStorePDO.
 	 * In the options you have to supply either:
 	 * - dsn, username, password and database (for a new PDO connection)
 	 * - conn (for the connection to be used)
