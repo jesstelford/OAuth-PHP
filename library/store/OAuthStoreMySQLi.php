@@ -35,7 +35,6 @@
  * Modified from OAuthStoreMySQL to support MySQLi
  */
 
-require_once dirname(__FILE__) . '/OAuthStoreAbstract.class.php';
 require_once dirname(__FILE__) . '/OAuthStoreMySQL.php';
 
 

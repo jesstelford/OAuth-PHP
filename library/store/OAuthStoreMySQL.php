@@ -33,7 +33,7 @@
  */
 
 
-require_once dirname(__FILE__) . '/OAuthStoreAbstract.class.php';
+require_once dirname(__FILE__) . '/OAuthStoreSQL.class.php';
 
 
 class OAuthStoreMySQL extends OAuthStoreSQL
