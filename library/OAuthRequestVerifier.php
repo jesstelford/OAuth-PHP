@@ -107,7 +107,8 @@ class OAuthRequestVerifier extends OAuthRequest
 		return $signed;
 	}
 
-	
+
+
 	/**
 	 * Verify the request
 	 * 
@@ -115,7 +116,23 @@ class OAuthRequestVerifier extends OAuthRequest
 	 * @exception OAuthException2 thrown when the request did not verify
 	 * @return int user_id associated with token (false when no user associated)
 	 */
-	public function verify ( $token_type = 'access' )
+	public function verify ( $token_type = 'access' ) 
+	{
+		$retval = $this->verifyExtended($token_type);
+		return $retval['user_id'];
+	}
+	
+	
+	/**
+	 * Verify the request
+	 * 
+	 * @param string token_type the kind of token needed, defaults to 'access' (false, 'access', 'request')
+	 * @exception OAuthException2 thrown when the request did not verify
+	 * @return array ('user_id' => associated with token (false when no user associated),
+	 *  'consumer_key' => the associated consumer_key)
+	 * 
+	 */
+	public function verifyExtended ( $token_type = 'access' )
 	{
 		$consumer_key = $this->getParam('oauth_consumer_key');
 		$token        = $this->getParam('oauth_token');
@@ -155,10 +172,6 @@ class OAuthRequestVerifier extends OAuthRequest
 				{
 					$method = $this->getParam('oauth_signature_method');
 				}
-				if (is_array($this->accepted_signatures) and !in_array($method, $this->accepted_signatures)) 
-				{
-					throw new OAuthException2('Unaccepted signature method.');
-				}
 
 				try
 				{
@@ -187,11 +200,11 @@ class OAuthRequestVerifier extends OAuthRequest
 		{
 			throw new OAuthException2('Can\'t verify request, missing oauth_consumer_key or oauth_token');
 		}
-		return $user_id;
+		return array('user_id' => $user_id, 'consumer_key' => $consumer_key); 
 	}
 
 
-
+	
 	/**
 	 * Verify the signature of the request, using the method in oauth_signature_method.
 	 * The signature is returned encoded in the form as used in the url.  So the base64 and
