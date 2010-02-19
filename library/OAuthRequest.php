@@ -513,10 +513,10 @@ class OAuthRequest
 				if(isset($ps_pre['host'])) $ps['host'] = $ps_pre['host'];
 				if(isset($ps_pre['port'])) $ps['port'] = $ps_pre['port'];
 			}
-			else
-			{
-				$ps['host'] = '';
-			}
+		}
+		else
+		{
+			$ps['host'] = '';
 		}
 		$ps['host'] = mb_strtolower($ps['host']);
 		if (!preg_match('/^[a-z0-9\.\-]+$/', $ps['host']))

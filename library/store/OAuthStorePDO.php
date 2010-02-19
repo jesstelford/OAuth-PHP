@@ -31,7 +31,7 @@
  * THE SOFTWARE.
  */
 
-require_once dirname(__FILE__) . '/OAuthStoreSQL.class.php';
+require_once dirname(__FILE__) . '/OAuthStoreSQL.php';
 
 
 class OAuthStorePDO extends OAuthStoreSQL
@@ -142,11 +142,15 @@ class OAuthStorePDO extends OAuthStoreSQL
 	 */
 	protected function query_row ( $sql )
 	{
-		// TODO: test
 		$sql = $this->sql_printf(func_get_args());
 		try 
 		{
-			$row = $this->conn->query("select count(*) from table")->fetch(PDO::FETCH_ASSOC);
+			$all = $this->conn->query($sql);
+			$row = array();
+			foreach ($all as $r) {
+				$row = $r;
+				break;
+			}
 		}
 		catch (PDOException $e)
 		{
@@ -208,7 +212,12 @@ class OAuthStorePDO extends OAuthStoreSQL
 	{
 		if (is_string($s))
 		{
-			return $this->conn->quote($s);
+			$s = $this->conn->quote($s);
+			// kludge. Quote already adds quotes, and this conflicts with OAuthStoreSQL.
+			// so remove the quotes
+			$len = mb_strlen($s);
+			if ($len > 0)
+				$s = mb_substr($s, 1, $len-1);
 		}
 		else if (is_null($s))
 		{
@@ -232,8 +241,20 @@ class OAuthStorePDO extends OAuthStoreSQL
 	protected function sql_errcheck ( $sql )
 	{
 		$msg =  "SQL Error in OAuthStoreMySQL: ". print_r($this->conn->errorInfo(), true) ."\n\n" . $sql;
+		$backtrace = debug_backtrace();
+		$msg .=  "\n\nAt file " . $backtrace[1]['file'] . ", line "  . $backtrace[1]['line']; 
 		throw new OAuthException2($msg);
 	}
+	
+	/**
+	* Initialise the database
+	*/
+	public function install ()
+	{
+		// TODO: this depends on mysql extension
+		require_once dirname(__FILE__) . '/mysql/install.php';
+	}
+	
 }
 
 
