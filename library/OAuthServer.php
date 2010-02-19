@@ -103,12 +103,12 @@ class OAuthServer extends OAuthRequestVerifier
 	 * @exception OAuthException2 thrown when not a valid request
 	 * @return array token description
 	 */
-	public function authorizeVerify ( $token = null )
+	public function authorizeVerify ( )
 	{
 		OAuthRequestLogger::start($this);
 
 		$store = OAuthStore::instance();
-		if (!$token) $token = $this->getParam('oauth_token', true);
+		$token = $this->getParam('oauth_token', true);
 		$rs    = $store->getConsumerRequestToken($token);
 		if (empty($rs))
 		{

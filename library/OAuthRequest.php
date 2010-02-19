@@ -84,7 +84,8 @@ class OAuthRequest
 			{
 				// non anyMeta systems
 				$method	= $_SERVER['REQUEST_METHOD'];
-				$uri	= $_SERVER['REQUEST_URI'];
+				$proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
+				$uri = sprintf('%s://%s%s', $proto, $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI']);
 			}
 			$headers      = getallheaders();
 			$parameters   = '';
@@ -493,31 +494,11 @@ class OAuthRequest
 	protected function parseUri ( $parameters )
 	{
 		$ps = @parse_url($this->uri);
-
+		
 		// Get the current/requested method
-		if (empty($ps['scheme']))
-		{
-			$ps['scheme'] = 'http';
-		}
-		else
-		{
-			$ps['scheme'] = strtolower($ps['scheme']);
-		}
+		$ps['scheme'] = strtolower($ps['scheme']);
 
 		// Get the current/requested host
-		if (empty($ps['host']))
-		{
-			if (isset($_SERVER['HTTP_HOST']))
-			{
-				$ps_pre = parse_url($_SERVER['HTTP_HOST']);
-				if(isset($ps_pre['host'])) $ps['host'] = $ps_pre['host'];
-				if(isset($ps_pre['port'])) $ps['port'] = $ps_pre['port'];
-			}
-		}
-		else
-		{
-			$ps['host'] = '';
-		}
 		$ps['host'] = mb_strtolower($ps['host']);
 		if (!preg_match('/^[a-z0-9\.\-]+$/', $ps['host']))
 		{
@@ -529,7 +510,7 @@ class OAuthRequest
 		{
 			$ps['port'] = $this->defaultPortForScheme($ps['scheme']);
 		}
-
+		
 		if (empty($ps['user']))
 		{
 			$ps['user'] = '';
