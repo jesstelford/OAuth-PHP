@@ -62,6 +62,7 @@ class OAuthServer extends OAuthRequestVerifier
 			$token  = $store->addConsumerRequestToken($this->getParam('oauth_consumer_key', true), $options);
 			$result = 'oauth_token='.$this->urlencode($token['token'])
 					.'&oauth_token_secret='.$this->urlencode($token['token_secret']);
+			// TODO: 1.0a '&oauth_callback_accepted=1'; 
 
 			if (!empty($token['token_ttl']))
 			{
@@ -97,15 +98,17 @@ class OAuthServer extends OAuthRequestVerifier
 	 * 
 	 * Nota bene: this stores the current token, consumer key and callback in the _SESSION
 	 * 
+	 * @param string token If not null, overrides the token. Useful for complex redirections
+	 * that use third-party authentication (such as OpenID).
 	 * @exception OAuthException2 thrown when not a valid request
 	 * @return array token description
 	 */
-	public function authorizeVerify ( )
+	public function authorizeVerify ( $token = null )
 	{
 		OAuthRequestLogger::start($this);
 
 		$store = OAuthStore::instance();
-		$token = $this->getParam('oauth_token', true);
+		if (!$token) $token = $this->getParam('oauth_token', true);
 		$rs    = $store->getConsumerRequestToken($token);
 		if (empty($rs))
 		{
