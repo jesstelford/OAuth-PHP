@@ -145,7 +145,7 @@ class OAuthStorePDO extends OAuthStoreSQL
 		$sql = $this->sql_printf(func_get_args());
 		try 
 		{
-			$all = $this->conn->query($sql);
+			$all = $this->conn->query($sql, PDO::FETCH_NUM);
 			$row = array();
 			foreach ($all as $r) {
 				$row = $r;
