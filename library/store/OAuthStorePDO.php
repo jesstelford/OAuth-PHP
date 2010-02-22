@@ -107,7 +107,7 @@ class OAuthStorePDO extends OAuthStoreSQL
 		{
 			$stmt = $this->conn->query($sql);
 			
-			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		}
 		catch (PDOException $e) 
 		{
