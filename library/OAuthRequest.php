@@ -87,7 +87,7 @@ class OAuthRequest
 				$proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
 				$uri = sprintf('%s://%s%s', $proto, $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI']);
 			}
-			$headers      = getallheaders();
+			$headers      = OAuthRequestLogger::getAllHeaders();
 			$parameters   = '';
 			$this->method = strtoupper($method);
 			
@@ -778,7 +778,6 @@ class OAuthRequest
 		echo '';
 		exit();
 	}
-	
 }
 
 

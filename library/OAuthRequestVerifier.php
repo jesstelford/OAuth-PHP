@@ -70,7 +70,7 @@ class OAuthRequestVerifier extends OAuthRequest
 		}
 		else
 		{
-			$hs = getallheaders();
+			$hs = OAuthRequestLogger::getAllHeaders();
 			if (isset($hs['Authorization']) && strpos($hs['Authorization'], 'oauth_signature') !== false)
 			{
 				$signed = true;
@@ -137,6 +137,7 @@ class OAuthRequestVerifier extends OAuthRequest
 		$consumer_key = $this->getParam('oauth_consumer_key');
 		$token        = $this->getParam('oauth_token');
 		$user_id      = false;
+		$secrets      = array();
 
 		if ($consumer_key && ($token_type === false || $token))
 		{
@@ -200,7 +201,7 @@ class OAuthRequestVerifier extends OAuthRequest
 		{
 			throw new OAuthException2('Can\'t verify request, missing oauth_consumer_key or oauth_token');
 		}
-		return array('user_id' => $user_id, 'consumer_key' => $consumer_key); 
+		return array('user_id' => $user_id, 'consumer_key' => $consumer_key, 'osr_id' => $secrets['osr_id']); 
 	}
 
 
