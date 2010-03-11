@@ -137,11 +137,12 @@ class OAuthRequester extends OAuthRequestSigner
 	 * @param array params (optional) extra arguments for when requesting the request token
 	 * @param string method (optional) change the method of the request, defaults to POST (as it should be)
 	 * @param array options (optional) options like name and token_ttl
+	 * @param array curl_options	optional extra options for curl request
 	 * @exception OAuthException2 when no key could be fetched
 	 * @exception OAuthException2 when no server with consumer_key registered
 	 * @return array (authorize_uri, token)
 	 */
-	static function requestRequestToken ( $consumer_key, $usr_id, $params = null, $method = 'POST', $options = array() )
+	static function requestRequestToken ( $consumer_key, $usr_id, $params = null, $method = 'POST', $options = array(), $curl_options = array())
 	{
 		OAuthRequestLogger::start();
 
@@ -156,7 +157,7 @@ class OAuthRequester extends OAuthRequestSigner
 
 		$oauth 	= new OAuthRequester($uri, $method, $params);
 		$oauth->sign($usr_id, $r);
-		$text	= $oauth->curl_raw();
+		$text	= $oauth->curl_raw($curl_options);
 
 		if (empty($text))
 		{
@@ -213,10 +214,12 @@ class OAuthRequester extends OAuthRequestSigner
 	 * @param int usr_id		user requesting the access token
 	 * @param string method (optional) change the method of the request, defaults to POST (as it should be)
 	 * @param array options (optional) extra options for request, eg token_ttl
+	 * @param array curl_options	optional extra options for curl request
+	 *  
 	 * @exception OAuthException2 when no key could be fetched
 	 * @exception OAuthException2 when no server with consumer_key registered
 	 */
-	static function requestAccessToken ( $consumer_key, $token, $usr_id, $method = 'POST', $options = array() )
+	static function requestAccessToken ( $consumer_key, $token, $usr_id, $method = 'POST', $options = array(), $curl_options = array() )
 	{
 		OAuthRequestLogger::start();
 
@@ -239,7 +242,7 @@ class OAuthRequester extends OAuthRequestSigner
 		OAuthRequestLogger::setRequestObject($oauth);
 
 		$oauth->sign($usr_id, $r);
-		$text	= $oauth->curl_raw();
+		$text	= $oauth->curl_raw($curl_options);
 		if (empty($text))
 		{
 			throw new OAuthException2('No answer from the server "'.$uri.'" while requesting a request token');
@@ -282,7 +285,7 @@ class OAuthRequester extends OAuthRequestSigner
 	/**
 	 * Open and close a curl session passing all the options to the curl libs
 	 * 
-	 * @param string url the http address to fetch
+	 * @param array opts the curl options.
 	 * @exception OAuthException2 when temporary file for PUT operation could not be created
 	 * @return string the result of the curl action
 	 */
@@ -404,6 +407,11 @@ class OAuthRequester extends OAuthRequestSigner
 		}
 
 		$txt = curl_exec($ch);
+		if ($txt === false) {
+			$error = curl_error($ch);
+			curl_close($ch);
+			throw new OAuthException2('CURL error: ' . $error);
+		} 
 		curl_close($ch);
 		
 		if (!empty($put_file))
