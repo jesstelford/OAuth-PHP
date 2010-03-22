@@ -499,7 +499,11 @@ class OAuthRequest
 		$ps['scheme'] = strtolower($ps['scheme']);
 
 		// Get the current/requested host
-		$ps['host'] = mb_strtolower($ps['host']);
+		if (function_exists('mb_strtolower'))
+			$ps['host'] = mb_strtolower($ps['host']);
+		else
+			$ps['host'] = strtolower($ps['host']);
+			
 		if (!preg_match('/^[a-z0-9\.\-]+$/', $ps['host']))
 		{
 			throw new OAuthException2('Unsupported characters in host name');
