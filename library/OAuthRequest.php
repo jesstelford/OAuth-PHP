@@ -72,52 +72,53 @@ class OAuthRequest
 	 */
 	function __construct ( $uri = null, $method = 'GET', $parameters = '', $headers = array(), $body = null )
 	{
-		if (empty($uri))
+		if (is_object($_SERVER))
 		{
-			if (is_object($_SERVER))
-			{
-				// Tainted arrays - the normal stuff in anyMeta
-				$method	= $_SERVER->REQUEST_METHOD->getRawUnsafe();
+			// Tainted arrays - the normal stuff in anyMeta
+			$method	= $_SERVER->REQUEST_METHOD->getRawUnsafe();
+			if (empty($uri)) {
 				$uri	= $_SERVER->REQUEST_URI->getRawUnsafe();
+			}
+		}
+		else
+		{
+			// non anyMeta systems
+			$method	= $_SERVER['REQUEST_METHOD'];
+			$proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
+			if (empty($uri)) {
+				$uri = sprintf('%s://%s%s', $proto, $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI']);
+			}
+		}
+		$headers      = OAuthRequestLogger::getAllHeaders();
+		$parameters   = '';
+		$this->method = strtoupper($method);
+		
+		// If this is a post then also check the posted variables
+		if (strcasecmp($method, 'POST') == 0)
+		{
+			/*
+			// TODO: what to do with 'multipart/form-data'?
+			if ($this->getRequestContentType() == 'multipart/form-data')
+			{
+				throw new OAuthException2('Unsupported POST content type, expected "application/x-www-form-urlencoded" got "'.@$_SERVER['CONTENT_TYPE'].'"');
+			}
+			*/
+			if ($this->getRequestContentType() == 'application/x-www-form-urlencoded')
+			{
+				// Get the posted body (when available)
+				if (!isset($headers['X-OAuth-Test']))
+				{
+					$parameters .= $this->getRequestBody();
+				}
 			}
 			else
 			{
-				// non anyMeta systems
-				$method	= $_SERVER['REQUEST_METHOD'];
-				$proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
-				$uri = sprintf('%s://%s%s', $proto, $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI']);
-			}
-			$headers      = OAuthRequestLogger::getAllHeaders();
-			$parameters   = '';
-			$this->method = strtoupper($method);
-			
-			// If this is a post then also check the posted variables
-			if (strcasecmp($method, 'POST') == 0)
-			{
-				/*
-				// TODO: what to do with 'multipart/form-data'?
-				if ($this->getRequestContentType() == 'multipart/form-data')
-				{
-					throw new OAuthException2('Unsupported POST content type, expected "application/x-www-form-urlencoded" got "'.@$_SERVER['CONTENT_TYPE'].'"');
-				}
-				*/
-				if ($this->getRequestContentType() == 'application/x-www-form-urlencoded')
-				{
-					// Get the posted body (when available)
-					if (!isset($headers['X-OAuth-Test']))
-					{
-						$parameters .= $this->getRequestBody();
-					}
-				}
-				else
-				{
-					$body = $this->getRequestBody();
-				}
-			}
-			else if (strcasecmp($method, 'PUT') == 0)
-			{
 				$body = $this->getRequestBody();
 			}
+		}
+		else if (strcasecmp($method, 'PUT') == 0)
+		{
+			$body = $this->getRequestBody();
 		}
 
 		$this->method  = strtoupper($method);
@@ -628,7 +629,8 @@ class OAuthRequest
 		}
 		else
 		{
-			return $this->urlencode(urldecode($s));
+			return $this->urlencode(rawurldecode($s));
+			// return $this->urlencode(urldecode($s));
 		}
 	}
 

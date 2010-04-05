@@ -47,9 +47,21 @@ class OAuthRequestVerifier extends OAuthRequest
 	 * 
 	 * @param string request
 	 * @param string method
+	 * @param array params The request parameters
 	 */
-	function __construct ( $uri = null, $method = 'GET' )
+	function __construct ( $uri = null, $method = 'GET', $params = null )
 	{
+ 		if ($params) {
+ 			$encodedParams = array();
+ 			foreach ($params as $key => $value) {
+ 				if (preg_match("/oauth_/", $value)) { // TODO: should it be "/^oauth_"?  
+ 					continue;
+ 				}
+ 				$encodedParams[rawurlencode($key)] = rawurlencode($value);
+ 			}
+ 			$this->param = array_merge($this->param, $encodedParams);
+ 		}
+ 
 		$this->store = OAuthStore::instance();
 		parent::__construct($uri, $method);
 		

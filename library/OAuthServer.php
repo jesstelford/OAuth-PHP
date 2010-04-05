@@ -57,6 +57,12 @@ class OAuthServer extends OAuthRequestVerifier
 				$options['token_ttl'] = $ttl;
 			}
 
+ 			// 1.0a Compatibility : associate callback url to the request token
+ 			$cbUrl   = $this->getParam('oauth_callback', true);
+ 			if ($cbUrl) {
+ 				$options['oauth_callback'] = $cbUrl;
+ 			}	
+			
 			// Create a request token
 			$store  = OAuthStore::instance();
 			$token  = $store->addConsumerRequestToken($this->getParam('oauth_consumer_key', true), $options);
@@ -121,7 +127,7 @@ class OAuthServer extends OAuthRequestVerifier
 		{
 			$_SESSION['verify_oauth_token'] 		= $rs['token'];
 			$_SESSION['verify_oauth_consumer_key']	= $rs['consumer_key'];
-			$_SESSION['verify_oauth_callback']		= $this->getParam('oauth_callback', true);
+			$_SESSION['verify_oauth_callback']		= $rs['callback_url'] ? $rs['callback_url'] : $this->getParam('oauth_callback', true);
 		}
 		OAuthRequestLogger::flush();
 		return $rs;
@@ -135,12 +141,14 @@ class OAuthServer extends OAuthRequestVerifier
 	 * 
 	 * @param boolean authorized	if the current token (oauth_token param) is authorized or not
 	 * @param int user_id			user for which the token was authorized (or denied)
+	 * @return string verifier  For 1.0a Compatibility
 	 */
 	public function authorizeFinish ( $authorized, $user_id )
 	{
 		OAuthRequestLogger::start($this);
 
 		$token = $this->getParam('oauth_token', true);
+		$verififer = null;
 		if (	isset($_SESSION['verify_oauth_token']) 
 			&&	$_SESSION['verify_oauth_token'] == $token)
 		{
@@ -150,7 +158,7 @@ class OAuthServer extends OAuthRequestVerifier
 			// Fetch the referrer host from the oauth callback parameter
 			$referrer_host  = '';
 			$oauth_callback = false;
-			if (!empty($_SESSION['verify_oauth_callback']))
+			if (!empty($_SESSION['verify_oauth_callback']) && $_SESSION['verify_oauth_callback'] != 'oob') // OUT OF BAND
 			{
 				$oauth_callback = $_SESSION['verify_oauth_callback'];
 				$ps = parse_url($oauth_callback);
@@ -163,7 +171,8 @@ class OAuthServer extends OAuthRequestVerifier
 			if ($authorized)
 			{
 				OAuthRequestLogger::addNote('Authorized token "'.$token.'" for user '.$user_id.' with referrer "'.$referrer_host.'"');
-				$store->authorizeConsumerRequestToken($token, $user_id, $referrer_host);
+ 				// 1.0a Compatibility : create a verifier code
+				$verifier = $store->authorizeConsumerRequestToken($token, $user_id, $referrer_host);
 			}
 			else
 			{
@@ -173,10 +182,16 @@ class OAuthServer extends OAuthRequestVerifier
 			
 			if (!empty($oauth_callback))
 			{
-				$this->redirect($oauth_callback, array('oauth_token'=>rawurlencode($token)));
+ 				$params = array('oauth_token' => rawurlencode($token));
+ 				// 1.0a Compatibility : if verifier code has been generated, add it to the URL
+ 				if ($verifier) {
+ 					$params['oauth_verifier'] = $verifier;
+ 				}
+ 				$this->redirect($oauth_callback, $params);
 			}
 		}
 		OAuthRequestLogger::flush();
+		return $verifier;
 	}
 	
 	
@@ -200,6 +215,11 @@ class OAuthServer extends OAuthRequestVerifier
 			{
 				$options['token_ttl'] = $ttl;
 			}
+
+			$verifier = $this->getParam('oauth_verifier', false);
+ 			if ($verifier) {
+ 				$options['verifier'] = $verifier;
+ 			}
 			
 			$store  = OAuthStore::instance();
 			$token  = $store->exchangeConsumerRequestForAccessToken($this->getParam('oauth_token', true), $options);

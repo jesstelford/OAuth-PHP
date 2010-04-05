@@ -1201,6 +1201,12 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 			$ttl = $this->max_request_token_ttl;
 		}
 
+		if (!isset($options['oauth_callback'])) {
+ 			$options['oauth_callback']='oob';
+ 		}
+ 		// 1.0a Compatibility : store callback url associated with request token
+		
+		
 		$this->query('
 				INSERT INTO oauth_server_token
 				SET ost_osr_id_ref		= %d,
@@ -1208,7 +1214,8 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 					ost_token			= \'%s\',
 					ost_token_secret	= \'%s\',
 					ost_token_type		= \'request\',
-					ost_token_ttl       = DATE_ADD(NOW(), INTERVAL %d SECOND)
+					ost_token_ttl       = DATE_ADD(NOW(), INTERVAL %d SECOND),
+					ost_callback_url    = \'%s\'
 				ON DUPLICATE KEY UPDATE
 					ost_osr_id_ref		= VALUES(ost_osr_id_ref),
 					ost_usa_id_ref		= VALUES(ost_usa_id_ref),
@@ -1217,7 +1224,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 					ost_token_type		= VALUES(ost_token_type),
 					ost_token_ttl       = VALUES(ost_token_ttl),
 					ost_timestamp		= NOW()
-				', $osr_id, $token, $secret, $ttl);
+				', $osr_id, $token, $secret, $ttl, $options['oauth_callback']);
 		
 		return array('token'=>$token, 'token_secret'=>$secret, 'token_ttl'=>$ttl);
 	}
@@ -1236,7 +1243,11 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 						ost_token_secret	as token_secret,
 						osr_consumer_key	as consumer_key,
 						osr_consumer_secret	as consumer_secret,
-						ost_token_type		as token_type
+						ost_token_type		as token_type,
+ 						ost_callback_url    as callback_url,
+ 						osr_application_title as application_title,
+ 						osr_application_descr as application_descr,
+ 						osr_application_uri   as application_uri					
 				FROM oauth_server_token
 						JOIN oauth_server_registry
 						ON ost_osr_id_ref = osr_id
@@ -1273,15 +1284,20 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 	 */
 	public function authorizeConsumerRequestToken ( $token, $user_id, $referrer_host = '' )
 	{
+ 		// 1.0a Compatibility : create a token verifier
+ 		$verifier = substr(md5(rand()),0,10);
+		
 		$this->query('
 					UPDATE oauth_server_token
 					SET ost_authorized    = 1,
 						ost_usa_id_ref    = %d,
 						ost_timestamp     = NOW(),
-						ost_referrer_host = \'%s\'
+						ost_referrer_host = \'%s\',
+						ost_verifier      = \'%s\'
 					WHERE ost_token      = \'%s\'
 					  AND ost_token_type = \'request\'
-					', $user_id, $referrer_host, $token);
+					', $user_id, $referrer_host, $verifier, $token);
+		return $verifier;
 	}
 
 
@@ -1329,7 +1345,13 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 		{
 			$ttl_sql = "'9999-12-31'";
 		}
-
+		
+ 		// 1.0a Compatibility : check token against oauth_verifier
+ 		$verifier = 0;
+ 		if (isset($options['verifier'])) {
+ 			$verifier = $options['verifier'];
+ 		}
+		
 		$this->query('
 					UPDATE oauth_server_token
 					SET ost_token			= \'%s\',
@@ -1341,7 +1363,8 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 					  AND ost_token_type = \'request\'
 					  AND ost_authorized = 1
 					  AND ost_token_ttl  >= NOW()
-					', $new_token, $new_secret, $token);
+					  AND ost_verifier = \'%s\'
+					', $new_token, $new_secret, $token, $verifier);
 		
 		if ($this->query_affected_rows() != 1)
 		{
