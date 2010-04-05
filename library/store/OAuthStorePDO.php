@@ -218,6 +218,7 @@ class OAuthStorePDO extends OAuthStoreSQL
 			$len = mb_strlen($s);
 			if ($len > 0)
 				$s = mb_substr($s, 1, $len-1);
+			return $s;
 		}
 		else if (is_null($s))
 		{
