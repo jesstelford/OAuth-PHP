@@ -200,6 +200,7 @@ CREATE TABLE IF NOT EXISTS oauth_server_token (
 	ost_referrer_host		varchar(128) not null,
 	ost_token_ttl           datetime not null default '9999-12-31',
     ost_timestamp           timestamp not null default current_timestamp,
+    ost_verifier			char(10),
 
 	primary key (ost_id),
     unique key (ost_token),
