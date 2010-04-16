@@ -32,9 +32,24 @@
  */
 
 require_once 'OAuthRequestVerifier.php';
+require_once 'OAuthRequestSession.php';
 
 class OAuthServer extends OAuthRequestVerifier
 {
+	protected $session;
+
+	/**
+	 * Construct the request to be verified
+	 * 
+	 * @param string request
+	 * @param string method
+	 * @param array params The request parameters
+	 */
+	function __construct ( $uri = null, $method = 'GET', $params = null, $store = 'Session' )
+	{
+ 		$this->session = OAuthSession::instance($store);
+ 	}
+	
 	/**
 	 * Handle the request_token request.
 	 * Returns the new request token and request token secret.
@@ -66,9 +81,8 @@ class OAuthServer extends OAuthRequestVerifier
 			// Create a request token
 			$store  = OAuthStore::instance();
 			$token  = $store->addConsumerRequestToken($this->getParam('oauth_consumer_key', true), $options);
-			$result = 'oauth_token='.$this->urlencode($token['token'])
+			$result = 'oauth_callback_accepted=1&oauth_token='.$this->urlencode($token['token'])
 					.'&oauth_token_secret='.$this->urlencode($token['token_secret']);
-			// TODO: 1.0a '&oauth_callback_accepted=1'; 
 
 			if (!empty($token['token_ttl']))
 			{
@@ -104,12 +118,10 @@ class OAuthServer extends OAuthRequestVerifier
 	 * 
 	 * Nota bene: this stores the current token, consumer key and callback in the _SESSION
 	 * 
-	 * @param string token If not null, overrides the token. Useful for complex redirections
-	 * that use third-party authentication (such as OpenID).
 	 * @exception OAuthException2 thrown when not a valid request
 	 * @return array token description
 	 */
-	public function authorizeVerify ( )
+	public function authorizeVerify ()
 	{
 		OAuthRequestLogger::start($this);
 
@@ -122,12 +134,12 @@ class OAuthServer extends OAuthRequestVerifier
 		}
 
 		// We need to remember the callback		
-		if (	empty($_SESSION['verify_oauth_token'])
-			||	strcmp($_SESSION['verify_oauth_token'], $rs['token']))
+		if (	empty($this->session->get('verify_oauth_token'))
+			||	strcmp($this->session->get('verify_oauth_token'), $rs['token']))
 		{
-			$_SESSION['verify_oauth_token'] 		= $rs['token'];
-			$_SESSION['verify_oauth_consumer_key']	= $rs['consumer_key'];
-			$_SESSION['verify_oauth_callback']		= $rs['callback_url'] ? $rs['callback_url'] : $this->getParam('oauth_callback', true);
+			$this->session->set('verify_oauth_token', $rs['token']);
+			$this->session->set('verify_oauth_consumer_key', $rs['consumer_key']);
+			$this->session->set('verify_oauth_callback', ($rs['callback_url'] ? $rs['callback_url'] : $this->getParam('oauth_callback', true)));
 		}
 		OAuthRequestLogger::flush();
 		return $rs;
@@ -149,8 +161,7 @@ class OAuthServer extends OAuthRequestVerifier
 
 		$token = $this->getParam('oauth_token', true);
 		$verififer = null;
-		if (	isset($_SESSION['verify_oauth_token']) 
-			&&	$_SESSION['verify_oauth_token'] == $token)
+		if ($this->session->set('verify_oauth_token') == $token)
 		{
 			// Flag the token as authorized, or remove the token when not authorized
 			$store = OAuthStore::instance();
@@ -158,9 +169,10 @@ class OAuthServer extends OAuthRequestVerifier
 			// Fetch the referrer host from the oauth callback parameter
 			$referrer_host  = '';
 			$oauth_callback = false;
-			if (!empty($_SESSION['verify_oauth_callback']) && $_SESSION['verify_oauth_callback'] != 'oob') // OUT OF BAND
+			if (!empty($this->session->get('verify_oauth_callback')) && 
+					$this->session->get('verify_oauth_callback') != 'oob') // OUT OF BAND
 			{
-				$oauth_callback = $_SESSION['verify_oauth_callback'];
+				$oauth_callback = $this->session->get('verify_oauth_callback');
 				$ps = parse_url($oauth_callback);
 				if (isset($ps['host']))
 				{
