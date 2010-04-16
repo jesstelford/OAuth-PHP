@@ -32,7 +32,7 @@
  */
 
 require_once 'OAuthRequestVerifier.php';
-require_once 'OAuthRequestSession.php';
+require_once 'OAuthSession.php';
 
 class OAuthServer extends OAuthRequestVerifier
 {
@@ -133,9 +133,10 @@ class OAuthServer extends OAuthRequestVerifier
 			throw new OAuthException2('Unknown request token "'.$token.'"');
 		}
 
-		// We need to remember the callback		
-		if (	empty($this->session->get('verify_oauth_token'))
-			||	strcmp($this->session->get('verify_oauth_token'), $rs['token']))
+		// We need to remember the callback
+		$verify_oauth_token = $this->session->get('verify_oauth_token');		
+		if (	empty($verify_oauth_token)
+			||	strcmp($verify_oauth_token, $rs['token']))
 		{
 			$this->session->set('verify_oauth_token', $rs['token']);
 			$this->session->set('verify_oauth_consumer_key', $rs['consumer_key']);
@@ -169,8 +170,8 @@ class OAuthServer extends OAuthRequestVerifier
 			// Fetch the referrer host from the oauth callback parameter
 			$referrer_host  = '';
 			$oauth_callback = false;
-			if (!empty($this->session->get('verify_oauth_callback')) && 
-					$this->session->get('verify_oauth_callback') != 'oob') // OUT OF BAND
+			$verify_oauth_callback = $this->session->get('verify_oauth_token');
+			if (!empty($verify_oauth_callback) && $verify_oauth_callback != 'oob') // OUT OF BAND
 			{
 				$oauth_callback = $this->session->get('verify_oauth_callback');
 				$ps = parse_url($oauth_callback);
