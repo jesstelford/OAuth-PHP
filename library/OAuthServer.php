@@ -44,10 +44,14 @@ class OAuthServer extends OAuthRequestVerifier
 	 * @param string request
 	 * @param string method
 	 * @param array params The request parameters
+	 * @param string store The session storage class.
+	 * @param array store_options The session storage class parameters.
 	 */
-	function __construct ( $uri = null, $method = 'GET', $params = null, $store = 'Session' )
+	function __construct ( $uri = null, $method = 'GET', $params = null, $store = 'Session', 
+			$store_options = array() )
 	{
- 		$this->session = OAuthSession::instance($store);
+ 		parent::__construct($uri, $method, $params);
+ 		$this->session = OAuthSession::instance($store, $store_options);
  	}
 	
 	/**
