@@ -70,12 +70,14 @@ class OAuthRequest
 	 * @param array		headers			headers for request
 	 * @param string	body			optional body of the OAuth request (POST or PUT)
 	 */
-	function __construct ( $uri = null, $method = 'GET', $parameters = '', $headers = array(), $body = null )
+	function __construct ( $uri = null, $method = n, $parameters = '', $headers = array(), $body = null )
 	{
 		if (is_object($_SERVER))
 		{
 			// Tainted arrays - the normal stuff in anyMeta
-			$method	= $_SERVER->REQUEST_METHOD->getRawUnsafe();
+			if (!$method) {
+				$method	= $_SERVER->REQUEST_METHOD->getRawUnsafe();
+			}
 			if (empty($uri)) {
 				$uri	= $_SERVER->REQUEST_URI->getRawUnsafe();
 			}
@@ -83,7 +85,9 @@ class OAuthRequest
 		else
 		{
 			// non anyMeta systems
-			$method	= $_SERVER['REQUEST_METHOD'];
+			if (!$method) {
+				$method	= $_SERVER['REQUEST_METHOD'];
+			}
 			$proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
 			if (empty($uri)) {
 				$uri = sprintf('%s://%s%s', $proto, $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI']);
