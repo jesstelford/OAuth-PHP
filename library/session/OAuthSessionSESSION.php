@@ -29,6 +29,8 @@
  * THE SOFTWARE.
  */
 
+require_once dirname(__FILE__) . '/OAuthSessionAbstract.class.php';
+
 class OAuthSessionSESSION extends OAuthSessionAbstract
 {
 	public function __construct( $options = array() )
