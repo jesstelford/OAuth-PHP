@@ -11,6 +11,11 @@
 
 # Changes:
 #
+#
+# 2010-04-20 (on 103)
+# 			ALTER TABLE oauth_server_token ADD ost_verifier char(10);
+# 			ALTER TABLE oauth_server_token ADD ost_callback_url	varchar(1024),
+#
 # 2008-10-15 (on r48) Added ttl to consumer and server tokens, added named server tokens
 #
 #			ALTER TABLE oauth_server_token 
@@ -201,6 +206,7 @@ CREATE TABLE IF NOT EXISTS oauth_server_token (
 	ost_token_ttl           datetime not null default '9999-12-31',
     ost_timestamp           timestamp not null default current_timestamp,
     ost_verifier			char(10),
+    ost_callback_url		varchar(1024),
 
 	primary key (ost_id),
     unique key (ost_token),
