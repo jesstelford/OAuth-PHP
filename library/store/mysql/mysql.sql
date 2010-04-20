@@ -12,7 +12,7 @@
 # Changes:
 #
 #
-# 2010-04-20 (on 103)
+# 2010-04-20 (on 103 and 110)
 # 			ALTER TABLE oauth_server_token ADD ost_verifier char(10);
 # 			ALTER TABLE oauth_server_token ADD ost_callback_url	varchar(1024),
 #
