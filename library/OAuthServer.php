@@ -166,7 +166,7 @@ class OAuthServer extends OAuthRequestVerifier
 
 		$token = $this->getParam('oauth_token', true);
 		$verififer = null;
-		if ($this->session->set('verify_oauth_token') == $token)
+		if ($this->session->get('verify_oauth_token') == $token)
 		{
 			// Flag the token as authorized, or remove the token when not authorized
 			$store = OAuthStore::instance();
