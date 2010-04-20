@@ -80,7 +80,7 @@ class OAuthServer extends OAuthRequestVerifier
  			$cbUrl   = $this->getParam('oauth_callback', true);
  			if ($cbUrl) {
  				$options['oauth_callback'] = $cbUrl;
- 			}	
+ 			}
 			
 			// Create a request token
 			$store  = OAuthStore::instance();
@@ -94,7 +94,7 @@ class OAuthServer extends OAuthRequestVerifier
 			}
 
 			$request_token = $token['token'];
-					
+			
 			header('HTTP/1.1 200 OK');
 			header('Content-Length: '.strlen($result));
 			header('Content-Type: application/x-www-form-urlencoded');

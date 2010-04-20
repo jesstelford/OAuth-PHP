@@ -54,7 +54,7 @@ class OAuthRequestVerifier extends OAuthRequest
  		if ($params) {
  			$encodedParams = array();
  			foreach ($params as $key => $value) {
- 				if (preg_match("/oauth_/", $value)) { // TODO: should it be "/^oauth_"?  
+ 				if (preg_match("/^oauth_/", $key)) { // TODO: should it be "/^oauth_"?  
  					continue;
  				}
  				$encodedParams[rawurlencode($key)] = rawurlencode($value);
@@ -174,7 +174,8 @@ class OAuthRequestVerifier extends OAuthRequest
 			}
 			catch (OAuthException2 $e)
 			{
-				throw new OAuthException2('Verification of signature failed (signature base string was "'.$this->signatureBaseString().'").');
+				throw new OAuthException2('Verification of signature failed (signature base string was "'.$this->signatureBaseString().'").' 
+					. " with  " . print_r(array($secrets['consumer_secret'], $secrets['token_secret'], $token_type), true));
 			}
 			
 			// Check the optional body signature

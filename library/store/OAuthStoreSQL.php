@@ -1202,10 +1202,9 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 		}
 
 		if (!isset($options['oauth_callback'])) {
- 			$options['oauth_callback']='oob';
+	 		// 1.0a Compatibility : store callback url associated with request token
+			$options['oauth_callback']='oob';
  		}
- 		// 1.0a Compatibility : store callback url associated with request token
-		
 		
 		$this->query('
 				INSERT INTO oauth_server_token

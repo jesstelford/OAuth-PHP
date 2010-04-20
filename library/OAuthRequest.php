@@ -492,8 +492,6 @@ class OAuthRequest
 	/**
 	 * Parse the uri into its parts.  Fill in the missing parts.
 	 * 
-	 * @todo  check for the use of https, right now we default to http
-	 * @todo  support for multiple occurences of parameters
 	 * @param string $parameters  optional extra parameters (from eg the http post)
 	 */
 	protected function parseUri ( $parameters )
@@ -550,7 +548,19 @@ class OAuthRequest
 				foreach ($params as $p)
 				{
 					@list($name, $value) = explode('=', $p, 2);
-					if (strlen($name)) 
+					if (!strlen($name)) 
+					{
+						continue;
+					}
+
+					if (array_key_exists($name, $this->param)) 
+					{
+						if (is_array($this->param[$name]))
+							$this->param[$name][] = $value;
+						else
+							$this->param[$name] = array($this->param[$name], $value);
+					}
+					else 
 					{
 						$this->param[$name]  = $value;
 					}
