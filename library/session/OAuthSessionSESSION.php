@@ -29,7 +29,7 @@
  * THE SOFTWARE.
  */
 
-abstract class OAuthSessionSESSION
+class OAuthSessionSESSION extends OAuthSessionAbstract
 {
 	public function __construct( $options = array() )
 	{
