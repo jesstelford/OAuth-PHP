@@ -216,15 +216,18 @@ class OAuthStorePDO extends OAuthStoreSQL
 			// kludge. Quote already adds quotes, and this conflicts with OAuthStoreSQL.
 			// so remove the quotes
 			$len = mb_strlen($s);
+			if ($len == 0)
+				return $s;
+
 			$startcut = 0;
-			$endcut = $len - 1;
-			while ($s[$startcut] == "'") {
+			while ($s[$startcut] == '\'')
 				$startcut++;
-			}
-			while ($s[$endcut] == "'") {
-				$endcut--;
-			}
-			$s = mb_substr($startcut, 1, $endcut);
+
+			$endcut = $len-1;
+			while ($s[$endcut] == '\'')
+				$endcut++;
+				
+			$s = mb_substr($s, $startcut, $endcut-$startcut+1);
 			return $s;
 		}
 		else if (is_null($s))
