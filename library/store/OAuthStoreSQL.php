@@ -325,7 +325,8 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 					SELECT ocr_id
 					FROM oauth_consumer_registry
 					WHERE ocr_consumer_key = \'%s\'
-					', $consumer_key);
+					AND ocr_usa_id_ref = %d
+					', $consumer_key, $user_id);
 					
 		if (empty($ocr_id))
 		{
