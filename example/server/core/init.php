@@ -92,6 +92,7 @@ function assert_logged_in()
 	{
 		$uri = $_SERVER['REQUEST_URI'];
 		header('Location: /logon?goto=' . urlencode($uri));
+		exit();
 	}
 }
 
