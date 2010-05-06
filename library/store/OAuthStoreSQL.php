@@ -1223,6 +1223,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 					ost_token_secret	= VALUES(ost_token_secret),
 					ost_token_type		= VALUES(ost_token_type),
 					ost_token_ttl       = VALUES(ost_token_ttl),
+					ost_callback_url    = VALUES(ost_callback_url),
 					ost_timestamp		= NOW()
 				', $osr_id, $token, $secret, $ttl, $options['oauth_callback']);
 		

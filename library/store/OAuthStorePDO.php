@@ -220,11 +220,11 @@ class OAuthStorePDO extends OAuthStoreSQL
 				return $s;
 
 			$startcut = 0;
-			while ($s[$startcut] == '\'')
+			while (isset($s[$startcut]) && $s[$startcut] == '\'')
 				$startcut++;
 
 			$endcut = $len-1;
-			while ($s[$endcut] == '\'')
+			while (isset($s[$endcut]) && $s[$endcut] == '\'')
 				$endcut--;
 				
 			$s = mb_substr($s, $startcut, $endcut-$startcut+1);

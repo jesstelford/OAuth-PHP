@@ -14,7 +14,7 @@
 #
 # 2010-04-20 (on 103 and 110)
 # 			ALTER TABLE oauth_server_token ADD ost_verifier char(10);
-# 			ALTER TABLE oauth_server_token ADD ost_callback_url varchar(1024);
+# 			ALTER TABLE oauth_server_token ADD ost_callback_url varchar(512);
 #
 # 2008-10-15 (on r48) Added ttl to consumer and server tokens, added named server tokens
 #
