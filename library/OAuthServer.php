@@ -174,7 +174,7 @@ class OAuthServer extends OAuthRequestVerifier
 			// Fetch the referrer host from the oauth callback parameter
 			$referrer_host  = '';
 			$oauth_callback = false;
-			$verify_oauth_callback = $this->session->get('verify_oauth_token');
+			$verify_oauth_callback = $this->session->get('verify_oauth_callback');
 			if (!empty($verify_oauth_callback) && $verify_oauth_callback != 'oob') // OUT OF BAND
 			{
 				$oauth_callback = $this->session->get('verify_oauth_callback');
