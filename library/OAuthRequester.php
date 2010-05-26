@@ -222,18 +222,22 @@ class OAuthRequester extends OAuthRequestSigner
 	static function requestAccessToken ( $consumer_key, $token, $usr_id, $method = 'POST', $options = array(), $curl_options = array() )
 	{
 		OAuthRequestLogger::start();
-
+				
 		$store	    = OAuthStore::instance();
 		$r		    = $store->getServerTokenSecrets($consumer_key, $token, 'request', $usr_id);
 		$uri 	    = $r['access_token_uri'];
 		$token_name	= $r['token_name'];
-
+		
 		// Delete the server request token, this one was for one use only
 		$store->deleteServerToken($consumer_key, $r['token'], 0, true);
 
 		// Try to exchange our request token for an access token
 		$oauth 	= new OAuthRequester($uri, $method);
 
+		if (isset($options['oauth_verifier'])) 
+		{
+			$oauth->setParam('oauth_verifier', $options['oauth_verifier']);
+        }
 		if (isset($options['token_ttl']) && is_numeric($options['token_ttl']))
 		{
 			$oauth->setParam('xoauth_token_ttl', intval($options['token_ttl']));
