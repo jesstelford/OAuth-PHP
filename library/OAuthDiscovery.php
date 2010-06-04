@@ -207,6 +207,7 @@ class OAuthDiscovery
 		curl_setopt($ch, CURLOPT_URL, 			 $uri);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_HEADER, 		 true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 		 30);
 
 		$txt = curl_exec($ch);
 		curl_close($ch);

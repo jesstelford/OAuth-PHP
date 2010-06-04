@@ -303,7 +303,7 @@ class OAuthRequester extends OAuthRequestSigner
 		{
 			$header = array();
 		}
-
+		
 		$ch 		= curl_init();
 		$method		= $this->getMethod();
 		$url		= $this->getRequestUrl();
@@ -401,6 +401,7 @@ class OAuthRequester extends OAuthRequestSigner
 		curl_setopt($ch, CURLOPT_URL, 			 $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_HEADER, 		 true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 		 30);
 	
 		foreach ($opts as $k => $v)
 		{
