@@ -1347,25 +1347,39 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 			$ttl_sql = "'9999-12-31'";
 		}
 		
- 		// 1.0a Compatibility : check token against oauth_verifier
- 		$verifier = 0;
  		if (isset($options['verifier'])) {
- 			$verifier = $options['verifier'];
- 		}
-		
-		$this->query('
-					UPDATE oauth_server_token
-					SET ost_token			= \'%s\',
-						ost_token_secret	= \'%s\',
-						ost_token_type		= \'access\',
-						ost_timestamp		= NOW(),
-						ost_token_ttl       = '.$ttl_sql.'
-					WHERE ost_token      = \'%s\'
-					  AND ost_token_type = \'request\'
-					  AND ost_authorized = 1
-					  AND ost_token_ttl  >= NOW()
-					  AND ost_verifier = \'%s\'
-					', $new_token, $new_secret, $token, $verifier);
+		 	$verifier = $options['verifier'];
+
+		 	// 1.0a Compatibility : check token against oauth_verifier
+		 	$this->query('
+		 				UPDATE oauth_server_token
+		 				SET ost_token			= \'%s\',
+		 					ost_token_secret	= \'%s\',
+		 					ost_token_type		= \'access\',
+		 					ost_timestamp		= NOW(),
+		 					ost_token_ttl       = '.$ttl_sql.'
+		 				WHERE ost_token      = \'%s\'
+		 				  AND ost_token_type = \'request\'
+		 				  AND ost_authorized = 1
+		 				  AND ost_token_ttl  >= NOW()
+		 				  AND ost_verifier = \'%s\'
+		 				', $new_token, $new_secret, $token, $verifier);
+ 		} else {
+
+		 	// 1.0
+		 	$this->query('
+		 				UPDATE oauth_server_token
+		 				SET ost_token			= \'%s\',
+		 					ost_token_secret	= \'%s\',
+		 					ost_token_type		= \'access\',
+		 					ost_timestamp		= NOW(),
+		 					ost_token_ttl       = '.$ttl_sql.'
+		 				WHERE ost_token      = \'%s\'
+		 				  AND ost_token_type = \'request\'
+		 				  AND ost_authorized = 1
+		 				  AND ost_token_ttl  >= NOW()
+		 				', $new_token, $new_secret, $token);
+		}
 		
 		if ($this->query_affected_rows() != 1)
 		{
