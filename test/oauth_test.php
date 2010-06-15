@@ -87,7 +87,7 @@ function oauth_test ()
 	// At this moment we don't support two parameters with the same name
 	// so I changed this test case to "a=" and "b=" and not "a=" and "a="
 	$req = new OAuthRequest('http://example.com/?b=x!y&a=x+y', 'GET');
-	assert('$req->getNormalizedParams() == \'a=x%20y&b=x%21y\'');
+	assert('$req->getNormalizedParams() == \'a=x%2By&b=x%21y\'');
 	
 	$req = new OAuthRequest('http://example.com/?x!y=a&x=a', 'GET');
 	assert('$req->getNormalizedParams() == \'x=a&x%21y=a\'');
