@@ -94,7 +94,6 @@ class OAuthRequest
 			}
 		}
 		$headers      = OAuthRequestLogger::getAllHeaders();
-		$parameters   = '';
 		$this->method = strtoupper($method);
 		
 		// If this is a post then also check the posted variables
