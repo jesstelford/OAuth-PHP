@@ -70,7 +70,7 @@ class OAuthRequest
 	 * @param array		headers			headers for request
 	 * @param string	body			optional body of the OAuth request (POST or PUT)
 	 */
-	function __construct ( $uri = null, $method = n, $parameters = '', $headers = array(), $body = null )
+	function __construct ( $uri = null, $method = null, $parameters = '', $headers = array(), $body = null )
 	{
 		if (is_object($_SERVER))
 		{
