@@ -58,7 +58,7 @@ class OAuthRequester extends OAuthRequestSigner
 	 * @param string body		optional body to send
 	 * @param array files		optional files to send (max 1 till OAuth support multipart/form-data posts)
 	 */
-	function __construct ( $request, $method = 'GET', $params = null, $body = null, $files = null )
+	function __construct ( $request, $method = null, $params = null, $body = null, $files = null )
 	{
 		parent::__construct($request, $method, $params, $body);
 

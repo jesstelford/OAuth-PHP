@@ -54,7 +54,7 @@ class OAuthRequestSigner extends OAuthRequest
 	 * @param mixed params 		string (for urlencoded data, or array with name/value pairs)
 	 * @param string body		optional body for PUT and/or POST requests
 	 */
-	function __construct ( $request, $method = 'GET', $params = null, $body = null )
+	function __construct ( $request, $method = null, $params = null, $body = null )
 	{
 		$this->store = OAuthStore::instance();
 		

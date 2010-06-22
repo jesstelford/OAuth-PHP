@@ -49,7 +49,7 @@ class OAuthRequestVerifier extends OAuthRequest
 	 * @param string method
 	 * @param array params The request parameters
 	 */
-	function __construct ( $uri = null, $method = 'GET', $params = null )
+	function __construct ( $uri = null, $method = null, $params = null )
 	{
  		if ($params) {
  			$encodedParams = array();
