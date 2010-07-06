@@ -11,6 +11,9 @@
 
 # Changes:
 #
+# 2010-04-20 (on 103 and 110)
+#           ALTER TABLE oauth_consumer_registry MODIFY ocr_consumer_key varchar(128) binary not null,
+#           ALTER TABLE oauth_consumer_registry MODIFY varchar(128) binary not null,
 #
 # 2010-04-20 (on 103 and 110)
 # 			ALTER TABLE oauth_server_token ADD ost_verifier char(10);
@@ -80,8 +83,8 @@ CREATE TABLE IF NOT EXISTS oauth_log (
 CREATE TABLE IF NOT EXISTS oauth_consumer_registry (
     ocr_id                  int(11) not null auto_increment,
     ocr_usa_id_ref          int(11),
-    ocr_consumer_key        varchar(64) binary not null,
-    ocr_consumer_secret     varchar(64) binary not null,
+    ocr_consumer_key        varchar(128) binary not null,
+    ocr_consumer_secret     varchar(128) binary not null,
     ocr_signature_methods   varchar(255) not null default 'HMAC-SHA1,PLAINTEXT',
     ocr_server_uri          varchar(255) not null,
     ocr_server_uri_host     varchar(128) not null,
