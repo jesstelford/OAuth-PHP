@@ -37,6 +37,17 @@ require_once 'OAuthSession.php';
 class OAuthServer extends OAuthRequestVerifier
 {
 	protected $session;
+	
+	protected $allowed_uri_schemes = array(
+		'http',
+		'https'
+	);
+
+	protected $disallowed_uri_schemes = array(
+		'file',
+		'callto',
+		'mailto'
+	);
 
 	/**
 	 * Construct the request to be verified
@@ -46,13 +57,42 @@ class OAuthServer extends OAuthRequestVerifier
 	 * @param array params The request parameters
 	 * @param string store The session storage class.
 	 * @param array store_options The session storage class parameters.
+	 * @param array options Extra options:
+	 *   - allowed_uri_schemes: list of allowed uri schemes.
+	 *   - disallowed_uri_schemes: list of unallowed uri schemes.
+	 * 
+	 * e.g. Allow only http and https
+	 * $options = array(
+	 *     'allowed_uri_schemes' => array('http', 'https'),
+	 *     'disallowed_uri_schemes' => array()
+	 * );
+	 * 
+	 * e.g. Disallow callto, mailto and file, allow everything else
+	 * $options = array(
+	 *     'allowed_uri_schemes' => array(),
+	 *     'disallowed_uri_schemes' => array('callto', 'mailto', 'file')
+	 * );
+	 * 
+	 * e.g. Allow everything
+	 * $options = array(
+	 *     'allowed_uri_schemes' => array(),
+	 *     'disallowed_uri_schemes' => array()
+	 * ); 
+	 *  
 	 */
 	function __construct ( $uri = null, $method = null, $params = null, $store = 'SESSION', 
-			$store_options = array() )
+			$store_options = array(), $options = array() )
 	{
  		parent::__construct($uri, $method, $params);
  		$this->session = OAuthSession::instance($store, $store_options);
- 	}
+ 		
+	 	if (array_key_exists('allowed_uri_schemes', $options) && is_array($options['allowed_uri_schemes'])) {
+	 		$this->allowed_uri_schemes = $options['allowed_uri_schemes'];
+	 	}
+	 	if (array_key_exists('disallowed_uri_schemes', $options) && is_array($options['disallowed_uri_schemes'])) {
+	 		$this->disallowed_uri_schemes = $options['disallowed_uri_schemes'];
+	 	}
+	}
 	
 	/**
 	 * Handle the request_token request.
@@ -205,6 +245,23 @@ class OAuthServer extends OAuthRequestVerifier
  				if ($verifier) {
  					$params['oauth_verifier'] = $verifier;
  				}
+ 				
+				$uri = preg_replace('/\s/', '%20', $oauth_callback);
+				if (!empty($this->allowed_uri_schemes)) 
+				{
+					if (!in_array(substr($uri, 0, strpos($uri, '://')), $this->allowed_uri_schemes)) 
+					{
+						throw new OAuthException2('Illegal protocol in redirect uri '.$uri);
+					}
+				} 
+				else if (!empty($this->disallowed_uri_schemes)) 
+				{
+					if (in_array(substr($uri, 0, strpos($uri, '://')), $this->disallowed_uri_schemes))
+					{
+						throw new OAuthException2('Illegal protocol in redirect uri '.$uri);
+					}
+				}
+
  				$this->redirect($oauth_callback, $params);
 			}
 		}
