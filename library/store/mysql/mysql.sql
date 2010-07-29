@@ -11,6 +11,10 @@
 
 # Changes:
 #
+# 2010-07-22 
+#			ALTER TABLE oauth_consumer_registry DROP INDEX ocr_consumer_key;
+#			ALTER TABLE oauth_consumer_registry ADD UNIQUE ocr_consumer_key(ocr_consumer_key,ocr_usa_id_ref,ocr_server_uri)
+#
 # 2010-04-20 (on 103 and 110)
 #           ALTER TABLE oauth_consumer_registry MODIFY ocr_consumer_key varchar(128) binary not null,
 #           ALTER TABLE oauth_consumer_registry MODIFY varchar(128) binary not null,
@@ -96,7 +100,7 @@ CREATE TABLE IF NOT EXISTS oauth_consumer_registry (
     ocr_timestamp           timestamp not null default current_timestamp,
 
     primary key (ocr_id),
-    unique key (ocr_consumer_key, ocr_usa_id_ref),
+    unique key (ocr_consumer_key, ocr_usa_id_ref, ocr_server_uri),
     key (ocr_server_uri),
     key (ocr_server_uri_host, ocr_server_uri_path),
     key (ocr_usa_id_ref)
