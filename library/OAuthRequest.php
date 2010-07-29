@@ -86,7 +86,12 @@ class OAuthRequest
 		{
 			// non anyMeta systems
 			if (!$method) {
-				$method	= $_SERVER['REQUEST_METHOD'];
+				if (isset($_SERVER['REQUEST_METHOD'])) {
+					$method	= $_SERVER['REQUEST_METHOD'];
+				}
+				else {
+					$method = 'GET';
+				}
 			}
 			$proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
 			if (empty($uri)) {
@@ -496,7 +501,7 @@ class OAuthRequest
 	protected function parseUri ( $parameters )
 	{
 		$ps = @parse_url($this->uri);
-		
+
 		// Get the current/requested method
 		$ps['scheme'] = strtolower($ps['scheme']);
 

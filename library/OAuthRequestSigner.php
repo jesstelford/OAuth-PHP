@@ -120,6 +120,10 @@ class OAuthRequestSigner extends OAuthRequest
 		$token		  = isset($secrets['token'])        ? $secrets['token']        : '';
 		$token_secret = isset($secrets['token_secret']) ? $secrets['token_secret'] : '';
 
+		if (!$token) {
+			$token = $this->getParam('oauth_token');
+		}
+
 		$this->setParam('oauth_signature_method',$signature_method);
 		$this->setParam('oauth_signature',		 '');
 		$this->setParam('oauth_nonce', 			 !empty($secrets['nonce'])     ? $secrets['nonce']     : uniqid(''));
