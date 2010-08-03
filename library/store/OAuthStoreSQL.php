@@ -321,12 +321,25 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 			$ttl = "'9999-12-31'";
 		}
 		
-		$ocr_id = $this->query_one('
-					SELECT ocr_id
-					FROM oauth_consumer_registry
-					WHERE ocr_consumer_key = \'%s\'
-					AND ocr_usa_id_ref = %d
-					', $consumer_key, $user_id);
+		if (isset($options['server_uri'])) 
+		{
+			$ocr_id = $this->query_one('
+						SELECT ocr_id
+						FROM oauth_consumer_registry
+						WHERE ocr_consumer_key = \'%s\'
+						AND ocr_usa_id_ref = %d
+						AND ocr_server_uri = \'%s\'
+						', $consumer_key, $user_id, $options['server_uri']);
+		}
+		else 
+		{
+			$ocr_id = $this->query_one('
+						SELECT ocr_id
+						FROM oauth_consumer_registry
+						WHERE ocr_consumer_key = \'%s\'
+						AND ocr_usa_id_ref = %d
+						', $consumer_key, $user_id);
+		}
 					
 		if (empty($ocr_id))
 		{
