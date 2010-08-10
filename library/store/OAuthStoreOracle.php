@@ -1,14 +1,25 @@
 <?php
 
 /**
- Added by Vinay Kant Sahu.
-Replaced all the MySQL queries with Oracle SPs. (ref: OAuthStoreSQL.php)
-vinaykant.sahu@gmail.com
-
+ * Added by Vinay Kant Sahu.
+ * Replaced all the MySQL queries with Oracle SPs. (ref: OAuthStoreSQL.php)
+ * vinaykant.sahu@gmail.com
+ *
  * Storage container for the oauth credentials, both server and consumer side.
  * Based on Oracle
+ *
+ * @author Vinay Kant Sahu <vinaykant.sahu@gmail.com>
+ * @date  Aug 6, 2010
  * 
- 
+ * The MIT License
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
  * 
@@ -19,11 +30,7 @@ vinaykant.sahu@gmail.com
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
-
-
-
  */
-
 
 require_once dirname(__FILE__) . '/OAuthStoreAbstract.class.php';
 
@@ -60,7 +67,7 @@ abstract class OAuthStoreOracle extends OAuthStoreAbstract {
                 throw new OAuthException2('Could not connect to database');
             }
 
-            $this->query('set character set utf8');
+            // $this->query('set character set utf8');
         }
     }
 
