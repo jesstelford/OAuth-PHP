@@ -16,8 +16,8 @@
 #			ALTER TABLE oauth_consumer_registry ADD UNIQUE ocr_consumer_key(ocr_consumer_key,ocr_usa_id_ref,ocr_server_uri)
 #
 # 2010-04-20 (on 103 and 110)
-#           ALTER TABLE oauth_consumer_registry MODIFY ocr_consumer_key varchar(128) binary not null,
-#           ALTER TABLE oauth_consumer_registry MODIFY varchar(128) binary not null,
+#           ALTER TABLE oauth_consumer_registry MODIFY ocr_consumer_key varchar(128) binary not null;
+#           ALTER TABLE oauth_consumer_registry MODIFY ocr_consumer_secret varchar(128) binary not null;
 #
 # 2010-04-20 (on 103 and 110)
 # 			ALTER TABLE oauth_server_token ADD ost_verifier char(10);
