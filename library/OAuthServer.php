@@ -125,7 +125,7 @@ class OAuthServer extends OAuthRequestVerifier
 			// Create a request token
 			$store  = OAuthStore::instance();
 			$token  = $store->addConsumerRequestToken($this->getParam('oauth_consumer_key', true), $options);
-			$result = 'oauth_callback_accepted=1&oauth_token='.$this->urlencode($token['token'])
+			$result = 'oauth_callback_confirmed=1&oauth_token='.$this->urlencode($token['token'])
 					.'&oauth_token_secret='.$this->urlencode($token['token_secret']);
 
 			if (!empty($token['token_ttl']))
