@@ -1328,6 +1328,19 @@ abstract class OAuthStoreOracle extends OAuthStoreAbstract {
 		return $rs;
 	}
 
+	/**
+	 * List of all registered applications. Data returned has not sensitive 
+	 * information and therefore is suitable for public displaying.
+	 * 
+	 * @param int $begin
+	 * @param int $total
+	 * @return array
+	 */
+	public function listConsumerApplications($begin = 0, $total = 25) 
+	{
+		// TODO
+		return array();
+	}
 
 	/**
 	 * Fetch a list of all consumer tokens accessing the account of the given user.
