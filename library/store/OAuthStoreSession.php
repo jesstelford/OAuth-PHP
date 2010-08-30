@@ -74,7 +74,6 @@ class OAuthStoreSession extends OAuthStoreAbstract
 		if ($consumer_key != $this->session['consumer_key']) {
 			return array();
 		} 
-		var_dump($this->session);
 		return array(
 			'consumer_key' => $consumer_key,
 			'consumer_secret' => $this->session['consumer_secret'],
