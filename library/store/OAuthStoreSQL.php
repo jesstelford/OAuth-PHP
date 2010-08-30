@@ -1536,6 +1536,30 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 		return $rs;
 	}
 
+	/**
+	 * List of all registered applications. Data returned has not sensitive 
+	 * information and therefore is suitable for public displaying.
+	 * 
+	 * @param int $begin
+	 * @param int $total
+	 * @return array
+	 */
+	public function listConsumerApplications($begin = 0, $total = 25) 
+	{
+		$rs = $this->query_all_assoc('
+				SELECT	osr_id					as id,
+						osr_enabled				as enabled,
+						osr_status 				as status,
+						osr_issue_date			as issue_date,
+						osr_application_uri		as application_uri,
+						osr_application_title	as application_title,
+						osr_application_descr	as application_descr
+				FROM oauth_server_registry
+				ORDER BY osr_application_title
+				');
+		// TODO: pagination
+		return $rs;
+	}
 
 	/**
 	 * Fetch a list of all consumer tokens accessing the account of the given user.
