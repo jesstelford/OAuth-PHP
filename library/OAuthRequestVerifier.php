@@ -54,7 +54,7 @@ class OAuthRequestVerifier extends OAuthRequest
  		if ($params) {
  			$encodedParams = array();
  			foreach ($params as $key => $value) {
- 				if (preg_match("/^oauth_/", $key)) { // TODO: should it be "/^oauth_"?  
+ 				if (preg_match("/^oauth_/", $key)) {  
  					continue;
  				}
  				$encodedParams[rawurlencode($key)] = rawurlencode($value);

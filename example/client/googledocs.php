@@ -75,7 +75,6 @@ try
 		//  STEP 2:  Get an access token
 		$oauthToken = $_GET["oauth_token"];
 		
-		echo "oauth_token = '" . $oauthToken . "'<br/>";
 		// echo "oauth_verifier = '" . $oauthVerifier . "'<br/>";
 		$tokenResultParams = $_GET;
 		
