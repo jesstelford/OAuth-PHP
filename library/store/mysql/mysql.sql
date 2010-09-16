@@ -11,6 +11,9 @@
 
 # Changes:
 #
+# 2010-09-15 
+#			ALTER TABLE oauth_server_token MODIFY ost_referrer_host varchar(128) not null default '';
+#
 # 2010-07-22 
 #			ALTER TABLE oauth_consumer_registry DROP INDEX ocr_consumer_key;
 #			ALTER TABLE oauth_consumer_registry ADD UNIQUE ocr_consumer_key(ocr_consumer_key,ocr_usa_id_ref,ocr_server_uri)
@@ -209,7 +212,7 @@ CREATE TABLE IF NOT EXISTS oauth_server_token (
     ost_token_secret        varchar(64) binary not null,
     ost_token_type          enum('request','access'),
     ost_authorized          tinyint(1) not null default '0',
-	ost_referrer_host       varchar(128) not null,
+	ost_referrer_host       varchar(128) not null default '',
 	ost_token_ttl           datetime not null default '9999-12-31',
     ost_timestamp           timestamp not null default current_timestamp,
     ost_verifier            char(10),
