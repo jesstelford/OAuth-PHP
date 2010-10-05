@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$store = OAuthStore::instance();
 		$key   = $store->updateConsumer($_POST, 1, true);
 
-		$c = $store->getConsumer($key);
+		$c = $store->getConsumer($key, 1);
 		echo 'Your consumer key is: <strong>' . $c['consumer_key'] . '</strong><br />';
 		echo 'Your consumer secret is: <strong>' . $c['consumer_secret'] . '</strong><br />';
 	}
