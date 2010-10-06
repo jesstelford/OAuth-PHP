@@ -75,7 +75,7 @@ class OAuthRequestSigner extends OAuthRequest
 		}
 		
 		// With put/ post we might have a body (not for application/x-www-form-urlencoded requests)
-		if ($method == 'PUT' || $method == 'POST')
+		if (strcasecmp($method, 'PUT') == 0 || strcasecmp($method, 'POST') == 0)
 		{
 			$this->setBody($body);
 		}
