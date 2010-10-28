@@ -98,7 +98,12 @@ class OAuthRequest
 			}
 			$proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
 			if (empty($uri)) {
-				$uri = sprintf('%s://%s%s', $proto, $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI']);
+				if (strpos($_SERVER['REQUEST_URI'], "://") === false) {
+					$uri = $_SERVER['REQUEST_URI'];
+				}
+				else {
+					$uri = sprintf('%s://%s%s', $proto, $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI']);
+				}
 			}
 		}
 		$headers      = OAuthRequestLogger::getAllHeaders();
