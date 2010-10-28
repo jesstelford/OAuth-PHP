@@ -589,7 +589,7 @@ class OAuthRequest
 		switch ($scheme)
 		{
 		case 'http':	return 80;
-		case 'https':	return 43;
+		case 'https':	return 443;
 		default:
 			throw new OAuthException2('Unsupported scheme type, expected http or https, got "'.$scheme.'"');
 			break;
