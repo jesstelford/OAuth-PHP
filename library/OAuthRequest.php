@@ -112,13 +112,15 @@ class OAuthRequest
 		// If this is a post then also check the posted variables
 		if (strcasecmp($method, 'POST') == 0)
 		{
-			/*
 			// TODO: what to do with 'multipart/form-data'?
 			if ($this->getRequestContentType() == 'multipart/form-data')
 			{
-				throw new OAuthException2('Unsupported POST content type, expected "application/x-www-form-urlencoded" got "'.@$_SERVER['CONTENT_TYPE'].'"');
+				// Get the posted body (when available)
+				if (!isset($headers['X-OAuth-Test']))
+				{
+					$parameters .= $this->getRequestBodyOfMultipart();
+				}
 			}
-			*/
 			if ($this->getRequestContentType() == 'application/x-www-form-urlencoded')
 			{
 				// Get the posted body (when available)
@@ -764,6 +766,34 @@ class OAuthRequest
 		return $body;
 	}
 
+	/**
+	 * Get the body of a POST with multipart/form-data by Edison tsai on 16:52 2010/09/16
+	 *
+	 * Used for fetching the post parameters and to calculate the body signature.
+	 *
+	 * @return string               null when no body present (or wrong content type for body)
+	 */
+	private function getRequestBodyOfMultipart()
+	{
+		$body = null;
+		if ($this->method == 'POST')
+		{
+			$body = '';
+			if (is_array($_POST) && count($_POST) > 1) 
+			{
+				foreach ($_POST AS $k => $v) {
+					$body .= $k . '=' . $this->urlencode($v) . '&';
+				} #end foreach
+				if(substr($body,-1) == '&')
+				{
+					$body = substr($body, 0, strlen($body)-1);
+				} #end if
+			} #end if
+		} #end if
+
+		return $body;
+	}
+	
 	
 	/**
 	 * Simple function to perform a redirect (GET).
