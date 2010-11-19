@@ -210,8 +210,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 						JOIN oauth_consumer_token ON oct_ocr_id_ref = ocr_id
 					WHERE ocr_server_uri_host = \'%s\'
 					  AND ocr_server_uri_path = LEFT(\'%s\', LENGTH(ocr_server_uri_path))
-					  AND (ocr_usa_id_ref = %s OR ocr_usa_id_ref IS NULL)
-					  AND oct_usa_id_ref	  = %d
+					  AND (ocr_usa_id_ref = \'%d\' OR ocr_usa_id_ref IS NULL)
 					  AND oct_token_type      = \'access\'
 					  AND oct_name			  = \'%s\'
 					  AND oct_token_ttl       >= NOW()
@@ -503,7 +502,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 					FROM oauth_consumer_registry
 					WHERE ocr_server_uri_host = \'%s\'
 					  AND ocr_server_uri_path = LEFT(\'%s\', LENGTH(ocr_server_uri_path))
-					  AND (ocr_usa_id_ref = %s OR ocr_usa_id_ref IS NULL)
+					  AND (ocr_usa_id_ref = \'%d\' OR ocr_usa_id_ref IS NULL)
 					ORDER BY ocr_usa_id_ref DESC, consumer_secret DESC, LENGTH(ocr_server_uri_path) DESC
 					LIMIT 0,1
 					', $host, $path, $user_id
@@ -1035,7 +1034,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 				INSERT INTO oauth_server_registry
 				SET osr_enabled				= 1,
 					osr_status				= \'active\',
-					osr_usa_id_ref			= %s,
+					osr_usa_id_ref			= \'%s\',
 					osr_consumer_key		= \'%s\',
 					osr_consumer_secret		= \'%s\',
 					osr_requester_name		= \'%s\',
