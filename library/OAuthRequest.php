@@ -186,10 +186,11 @@ class OAuthRequest
 						'oauth_nonce'
 					);
 
+		/* removed as per in issue 83 
 		if ($token_type !== false)
 		{
 			$required[] = 'oauth_token';
-		}
+		} */
 
 		foreach ($required as $req)
 		{
