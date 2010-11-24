@@ -109,7 +109,7 @@ class OAuthRequester extends OAuthRequestSigner
 			$this->setBody($body);
 			$curl_options = $this->prepareCurlOptions($curl_options, $extra_headers);
 		}
-		$this->sign($usr_id, null, $name, 'request');
+		$this->sign($usr_id, null, $name);
 		$text   = $this->curl_raw($curl_options);
 		$result = $this->curl_parse($text);	
 		if ($result['code'] >= 400)
