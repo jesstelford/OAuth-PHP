@@ -216,7 +216,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 					  AND oct_token_ttl       >= NOW()
 					ORDER BY ocr_usa_id_ref DESC, ocr_consumer_secret DESC, LENGTH(ocr_server_uri_path) DESC
 					LIMIT 0,1
-					', $host, $path, $user_id, $user_id, $name
+					', $host, $path, $user_id, $name
 					);
 		
 		if (empty($secrets))
