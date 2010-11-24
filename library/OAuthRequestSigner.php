@@ -128,7 +128,7 @@ class OAuthRequestSigner extends OAuthRequest
 		$this->setParam('oauth_signature',		 '');
 		$this->setParam('oauth_nonce', 			 !empty($secrets['nonce'])     ? $secrets['nonce']     : uniqid(''));
 		$this->setParam('oauth_timestamp', 		 !empty($secrets['timestamp']) ? $secrets['timestamp'] : time());
-		if ($oauth_token != 'request')
+		if ($oauth_token != 'requestToken')
 			$this->setParam('oauth_token', 		 $token);
 		$this->setParam('oauth_consumer_key',	 $secrets['consumer_key']);
 		$this->setParam('oauth_version',		 '1.0');

@@ -156,7 +156,7 @@ class OAuthRequester extends OAuthRequestSigner
 		$uri 	= $r['request_token_uri'];
 
 		$oauth 	= new OAuthRequester($uri, $method, $params);
-		$oauth->sign($usr_id, $r, '', 'request');
+		$oauth->sign($usr_id, $r, '', 'requestToken');
 		$text	= $oauth->curl_raw($curl_options);
 
 		if (empty($text))
@@ -245,7 +245,7 @@ class OAuthRequester extends OAuthRequestSigner
 
 		OAuthRequestLogger::setRequestObject($oauth);
 
-		$oauth->sign($usr_id, $r, '', 'access');
+		$oauth->sign($usr_id, $r, '', 'accessToken');
 		$text	= $oauth->curl_raw($curl_options);
 		if (empty($text))
 		{
