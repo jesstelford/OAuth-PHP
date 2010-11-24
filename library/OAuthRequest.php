@@ -98,7 +98,7 @@ class OAuthRequest
 			}
 			$proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
 			if (empty($uri)) {
-				if (strpos($_SERVER['REQUEST_URI'], "://") === false) {
+				if (strpos($_SERVER['REQUEST_URI'], "://") !== false) {
 					$uri = $_SERVER['REQUEST_URI'];
 				}
 				else {
