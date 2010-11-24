@@ -109,7 +109,7 @@ class OAuthRequester extends OAuthRequestSigner
 			$this->setBody($body);
 			$curl_options = $this->prepareCurlOptions($curl_options, $extra_headers);
 		}
-		$this->sign($usr_id, null, $name);
+		$this->sign($usr_id, null, $name, 'request');
 		$text   = $this->curl_raw($curl_options);
 		$result = $this->curl_parse($text);	
 		if ($result['code'] >= 400)
@@ -156,7 +156,7 @@ class OAuthRequester extends OAuthRequestSigner
 		$uri 	= $r['request_token_uri'];
 
 		$oauth 	= new OAuthRequester($uri, $method, $params);
-		$oauth->sign($usr_id, $r);
+		$oauth->sign($usr_id, $r, '', 'request');
 		$text	= $oauth->curl_raw($curl_options);
 
 		if (empty($text))
@@ -245,7 +245,7 @@ class OAuthRequester extends OAuthRequestSigner
 
 		OAuthRequestLogger::setRequestObject($oauth);
 
-		$oauth->sign($usr_id, $r);
+		$oauth->sign($usr_id, $r, '', 'access');
 		$text	= $oauth->curl_raw($curl_options);
 		if (empty($text))
 		{

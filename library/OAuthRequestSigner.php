@@ -102,7 +102,7 @@ class OAuthRequestSigner extends OAuthRequest
 	 * @exception OAuthException2 when there is no oauth relation with the server
 	 * @exception OAuthException2 when we don't support the signing methods of the server
 	 */	
-	function sign ( $usr_id = 0, $secrets = null, $name = '' )
+	function sign ( $usr_id = 0, $secrets = null, $name = '', $token_type = null)
 	{
 		$url = $this->getRequestUrl();
 		if (empty($secrets))
@@ -128,8 +128,8 @@ class OAuthRequestSigner extends OAuthRequest
 		$this->setParam('oauth_signature',		 '');
 		$this->setParam('oauth_nonce', 			 !empty($secrets['nonce'])     ? $secrets['nonce']     : uniqid(''));
 		$this->setParam('oauth_timestamp', 		 !empty($secrets['timestamp']) ? $secrets['timestamp'] : time());
-		// removed as mentioned in issue 83
-		// $this->setParam('oauth_token', 		 	 $token);
+		if ($oauth_token != 'request')
+			$this->setParam('oauth_token', 		 $token);
 		$this->setParam('oauth_consumer_key',	 $secrets['consumer_key']);
 		$this->setParam('oauth_version',		 '1.0');
 		
@@ -141,7 +141,7 @@ class OAuthRequestSigner extends OAuthRequest
 			$this->setParam('xoauth_body_signature', $body_signature, true);
 		}
 		
-		$signature = $this->calculateSignature($secrets['consumer_secret'], $token_secret);
+		$signature = $this->calculateSignature($secrets['consumer_secret'], $token_secret, $token_type);
 		$this->setParam('oauth_signature',		 $signature, true);
 		
 		$this->signed = true;

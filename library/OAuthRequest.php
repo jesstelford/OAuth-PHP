@@ -174,6 +174,7 @@ class OAuthRequest
 	 * 
 	 * @param string consumer_secret
 	 * @param string token_secret
+	 * @param string token_type
 	 * @exception when not all parts available
 	 * @return string
 	 */
@@ -186,11 +187,11 @@ class OAuthRequest
 						'oauth_nonce'
 					);
 
-		/* removed as per in issue 83 
-		if ($token_type !== false)
+		// removed as per in issue 83 
+		if ($token_type != 'request')
 		{
 			$required[] = 'oauth_token';
-		} */
+		}
 
 		foreach ($required as $req)
 		{
