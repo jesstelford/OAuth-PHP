@@ -88,9 +88,6 @@ class OAuthRequest
 			if (!$method) {
 				if (isset($_SERVER['REQUEST_METHOD'])) {
 					$method	= $_SERVER['REQUEST_METHOD'];
-				} 
-				else if (isset($_SERVER['SCRIPT_URI'])) {
-					$method	= $_SERVER['SCRIPT_URI'] . $_SERVER['QUERY_STRING'];
 				}
 				else {
 					$method = 'GET';
