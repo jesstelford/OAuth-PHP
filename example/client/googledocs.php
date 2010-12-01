@@ -29,8 +29,8 @@
  */
 
 
-include_once "../../oauth-php/library/OAuthStore.php";
-include_once "../../oauth-php/library/OAuthRequester.php";
+include_once "../../library/OAuthStore.php";
+include_once "../../library/OAuthRequester.php";
 
 define("GOOGLE_CONSUMER_KEY", "FILL THIS"); // 
 define("GOOGLE_CONSUMER_SECRET", "FILL THIS"); // 
@@ -63,7 +63,7 @@ try
 		$getAuthTokenParams = array('scope' => 
 			'http://docs.google.com/feeds/',
 			'xoauth_displayname' => 'Oauth test',
-			'oauth_callback' => 'http://likeorhate.local/google.php');
+			'oauth_callback' => 'XXXXXXXXXXX');
 
 		// get a request token
 		$tokenResultParams = OAuthRequester::requestRequestToken(GOOGLE_CONSUMER_KEY, 0, $getAuthTokenParams);
@@ -91,7 +91,6 @@ try
 		    return;
 		}
 		
-
 		// make the docs requestrequest.
 		$request = new OAuthRequester("http://docs.google.com/feeds/documents/private/full", 'GET', $tokenResultParams);
 		$result = $request->doRequest(0);
