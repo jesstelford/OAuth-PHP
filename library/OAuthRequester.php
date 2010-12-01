@@ -88,7 +88,11 @@ class OAuthRequester extends OAuthRequestSigner
 	 * 
 	 * @param int usr_id			optional user id for which we make the request
 	 * @param array curl_options	optional extra options for curl request
-	 * @param array options			options like name and token_ttl
+	 * @param array options			options like 
+	 * 	- name Named tokens, unique per user/consumer key
+	 *  - token_ttl Time to live
+	 *  - server_uri The server uri
+	 *  - boolean oauth_as_header set to false to include oauth parameters in query string. Default true (includes on headers)
 	 * @exception OAuthException2 when authentication not accepted
 	 * @exception OAuthException2 when signing was not possible
 	 * @return array (code=>int, headers=>array(), body=>string)
@@ -110,7 +114,7 @@ class OAuthRequester extends OAuthRequestSigner
 			$curl_options = $this->prepareCurlOptions($curl_options, $extra_headers);
 		}
 		$this->sign($usr_id, null, $name);
-		$text   = $this->curl_raw($curl_options);
+		$text   = $this->curl_raw($curl_options, (isset($options['oauth_as_header']) ? $options['oauth_as_header'] : true));
 		$result = $this->curl_parse($text);	
 		if ($result['code'] >= 400)
 		{
@@ -136,13 +140,17 @@ class OAuthRequester extends OAuthRequestSigner
 	 * @param int usr_id
 	 * @param array params (optional) extra arguments for when requesting the request token
 	 * @param string method (optional) change the method of the request, defaults to POST (as it should be)
-	 * @param array options (optional) options like name and token_ttl
+	 * @param array options (optional) options:
+	 * 	- name Named tokens, unique per user/consumer key
+	 *  - token_ttl Time to live
+	 *  - server_uri The server uri
+	 *  - boolean oauth_as_header set to false to include oauth parameters in query string. Default true (includes on headers)
 	 * @param array curl_options	optional extra options for curl request
 	 * @exception OAuthException2 when no key could be fetched
 	 * @exception OAuthException2 when no server with consumer_key registered
 	 * @return array (authorize_uri, token)
 	 */
-	static function requestRequestToken ( $consumer_key, $usr_id, $params = null, $method = 'POST', $options = array(), $curl_options = array())
+	static function requestRequestToken ( $consumer_key, $usr_id, $params = null, $method = 'POST', $options = array(), $curl_options = array() )
 	{
 		OAuthRequestLogger::start();
 
@@ -157,7 +165,7 @@ class OAuthRequester extends OAuthRequestSigner
 
 		$oauth 	= new OAuthRequester($uri, $method, $params);
 		$oauth->sign($usr_id, $r, '', 'requestToken');
-		$text	= $oauth->curl_raw($curl_options);
+		$text	= $oauth->curl_raw($curl_options, (isset($options['oauth_as_header']) ? $options['oauth_as_header'] : true));
 
 		if (empty($text))
 		{
@@ -166,7 +174,7 @@ class OAuthRequester extends OAuthRequestSigner
 		$data	= $oauth->curl_parse($text);
 		if ($data['code'] != 200)
 		{
-			throw new OAuthException2('Unexpected result from the server "'.$uri.'" ('.$data['code'].') while requesting a request token');
+			throw new OAuthException2('Unexpected result from the server "'.$uri.'" ('.$data['code'].') while requesting a request token:' . $data['body']);
 		}
 		$token  = array();
 		$params = explode('&', $data['body']);
@@ -213,13 +221,17 @@ class OAuthRequester extends OAuthRequestSigner
 	 * @param string token
 	 * @param int usr_id		user requesting the access token
 	 * @param string method (optional) change the method of the request, defaults to POST (as it should be)
-	 * @param array options (optional) extra options for request, eg token_ttl
+	 * @param array options (optional) options:
+	 * 	- name Named tokens, unique per user/consumer key
+	 *  - token_ttl Time to live
+	 *  - server_uri The server uri
+	 *  - boolean oauth_as_header set to false to include oauth parameters in query string. Default true (includes on headers)
 	 * @param array curl_options	optional extra options for curl request
 	 *  
 	 * @exception OAuthException2 when no key could be fetched
 	 * @exception OAuthException2 when no server with consumer_key registered
 	 */
-	static function requestAccessToken ( $consumer_key, $token, $usr_id, $method = 'POST', $options = array(), $curl_options = array() )
+	static function requestAccessToken ( $consumer_key, $token, $usr_id, $method = 'POST', $options = array(), $curl_options = array())
 	{
 		OAuthRequestLogger::start();
 				
@@ -246,7 +258,7 @@ class OAuthRequester extends OAuthRequestSigner
 		OAuthRequestLogger::setRequestObject($oauth);
 
 		$oauth->sign($usr_id, $r, '', 'accessToken');
-		$text	= $oauth->curl_raw($curl_options);
+		$text	= $oauth->curl_raw($curl_options, (isset($options['oauth_as_header']) ? $options['oauth_as_header'] : true));
 		if (empty($text))
 		{
 			throw new OAuthException2('No answer from the server "'.$uri.'" while requesting an access token');
@@ -290,10 +302,11 @@ class OAuthRequester extends OAuthRequestSigner
 	 * Open and close a curl session passing all the options to the curl libs
 	 * 
 	 * @param array opts the curl options.
+	 * @param boolean oauth_as_header		(optional) set to false to include oauth parameters in query string
 	 * @exception OAuthException2 when temporary file for PUT operation could not be created
 	 * @return string the result of the curl action
 	 */
-	protected function curl_raw ( $opts = array() )
+	protected function curl_raw ( $opts = array(), $oauth_as_header = true )
 	{
 		if (isset($opts[CURLOPT_HTTPHEADER]))
 		{
@@ -308,7 +321,7 @@ class OAuthRequester extends OAuthRequestSigner
 		$method		= $this->getMethod();
 		$url		= $this->getRequestUrl();
 		$header[]	= $this->getAuthorizationHeader();
-		$query		= $this->getQueryString();
+		$query		= $this->getQueryString($oauth_as_header);
 		$body		= $this->getBody();
 
 		$has_content_type = false;
