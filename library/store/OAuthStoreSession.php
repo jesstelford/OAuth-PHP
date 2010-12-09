@@ -59,7 +59,7 @@ class OAuthStoreSession extends OAuthStoreAbstract
 		}
 		else
 		{
-			throw new OAuthException2("OAuthStoreSession needs consumer_token and consumer_secret");
+			throw new OAuthException2("OAuthStoreSession needs consumer_key and consumer_secret");
 		}
 	}
 
