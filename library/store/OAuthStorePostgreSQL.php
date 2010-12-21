@@ -1654,7 +1654,7 @@ class OAuthStorePostgreSQL extends OAuthStoreAbstract
         foreach ($keys as $key => $value)
         {
             $args[] = $value;
-            $ps[]   = "olg_$key = '%s'";
+            $ps["olg_$key"] = "'%s'";
         }
 
         if (!empty($_SERVER['REMOTE_ADDR']))
@@ -1676,8 +1676,8 @@ class OAuthStorePostgreSQL extends OAuthStoreAbstract
         $ps['olg_base_string'] = "'%s'";                        $args[] = $base_string;
         $ps['olg_notes']       = "'%s'";                        $args[] = $this->makeUTF8($notes);
         $ps['olg_usa_id_ref'] = "NULLIF('%d', '0')";            $args[] = $user_id;
-        $ps['olg_remote_ip']  = "NULLIF('%s','0.0.0.0')";        $args[] = $remote_ip;
-
+        $ps['olg_remote_ip']  = "NULLIF('%s','0.0.0.0')::inet";        $args[] = $remote_ip;
+        
         $this->query('
             INSERT INTO oauth_log ('.implode(',', array_keys($ps)) . ')
             VALUES(' . implode(',', $ps) . ')',
