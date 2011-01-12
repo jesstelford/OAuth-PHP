@@ -40,10 +40,15 @@ class OAuthStore
 
 	/**
 	 * Request an instance of the OAuthStore
+	 * 
+	 * @param string $store The storage system
+	 * @param array $options To pass to the storage system
+	 * @param boolean $forceNewInstance If true, forces the instantiation of a new store.
+	 * @throws OAuthException2
 	 */
-	public static function instance ( $store = 'MySQL', $options = array() )
+	public static function instance ( $store = 'MySQL', $options = array(), $forceNewInstance = false )
 	{
-	    if (!OAuthStore::$instance)
+	    if (!OAuthStore::$instance or $forceNewInstance)
 	    {
 			// Select the store you want to use
 			if (strpos($store, '/') === false)
