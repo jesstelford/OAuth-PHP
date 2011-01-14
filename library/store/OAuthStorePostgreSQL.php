@@ -661,13 +661,35 @@ class OAuthStorePostgreSQL extends OAuthStoreAbstract
      * @param string token
      * @param int token_ttl
      */
-    public function setServerTokenTtl ( $consumer_key, $token, $token_ttl )
+    public function setServerTokenTtl ( $consumer_key, $token, $token_ttl, $server_uri = NULL )
     {
         if ($token_ttl <= 0)
         {
             // Immediate delete when the token is past its ttl
             $this->deleteServerToken($consumer_key, $token, 0, true);
         }
+		else if ( $server_uri ) 
+		{
+			// Set maximum time to live for this token
+            $this->query('
+                        UPDATE oauth_consumer_token
+                        SET ost_token_ttl = (NOW() + INTERVAL \'%d SECOND\')
+                        WHERE ocr_consumer_key    = \'%s\'
+						  AND ocr_server_uri = \'%s\'
+                          AND oct_ocr_id_ref    = ocr_id
+                          AND oct_token         = \'%s\'
+                          ', $token_ttl, $server_uri, $consumer_key, $token);
+
+            // Set maximum time to live for this token
+            $this->query('
+                        UPDATE oauth_consumer_registry
+                        SET ost_token_ttl = (NOW() + INTERVAL \'%d SECOND\')
+                        WHERE ocr_consumer_key    = \'%s\'
+						  AND ocr_server_uri = \'%s\'
+                          AND oct_ocr_id_ref    = ocr_id
+                          AND oct_token         = \'%s\'
+                        ', $token_ttl, $server_uri, $consumer_key, $token);
+		}
         else
         {
             // Set maximum time to live for this token

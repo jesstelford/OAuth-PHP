@@ -632,32 +632,37 @@ abstract class OAuthStoreOracle extends OAuthStoreAbstract {
 	 * @param string token
 	 * @param int token_ttl
 	 */
-	public function setServerTokenTtl ( $consumer_key, $token, $token_ttl )
+	public function setServerTokenTtl ( $consumer_key, $token, $token_ttl, $server_uri = NULL )
 	{
 		if ($token_ttl <= 0)
 		{
 			// Immediate delete when the token is past its ttl
 			$this->deleteServerToken($consumer_key, $token, 0, true);
 		}
+		else if ( $server_uri ) 
+		{
+			// TODO
+			throw new OAuthException2('server_uri not implemented in Oracle yet, sorry');	
+		}
 		else
 		{
 			// Set maximum time to live for this token
+
+			//
+			$sql = "BEGIN SP_SET_SERVER_TOKEN_TTL(:P_TOKEN_TTL, :P_CONSUMER_KEY, :P_TOKEN, :P_RESULT); END;";
 			
-                         //
-                         $sql = "BEGIN SP_SET_SERVER_TOKEN_TTL(:P_TOKEN_TTL, :P_CONSUMER_KEY, :P_TOKEN, :P_RESULT); END;";
-
-                         // parse sql
-                         $stmt = oci_parse($this->conn, $sql) or die ('Can not parse query');
-
-                         // Bind In and Out Variables
-                         oci_bind_by_name($stmt, ':P_TOKEN_TTL', $token_ttl, 40);
-                         oci_bind_by_name($stmt, ':P_CONSUMER_KEY', $consumer_key, 255);
-                         oci_bind_by_name($stmt, ':P_TOKEN', $token, 255);
-                         oci_bind_by_name($stmt, ':P_RESULT', $result, 20);                         
-
-                         //Execute the statement
-                         oci_execute($stmt);
-                         //                    
+			// parse sql
+			$stmt = oci_parse($this->conn, $sql) or die ('Can not parse query');
+			
+			// Bind In and Out Variables
+			oci_bind_by_name($stmt, ':P_TOKEN_TTL', $token_ttl, 40);
+			oci_bind_by_name($stmt, ':P_CONSUMER_KEY', $consumer_key, 255);
+			oci_bind_by_name($stmt, ':P_TOKEN', $token, 255);
+			oci_bind_by_name($stmt, ':P_RESULT', $result, 20);                         
+			
+			//Execute the statement
+			oci_execute($stmt);
+//                    
 		}
 	}
 

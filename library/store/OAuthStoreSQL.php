@@ -295,7 +295,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 	 * @param string token
 	 * @param string token_secret
 	 * @param int 	 user_id			the user owning the token
-	 * @param array  options			extra options, name and token_ttl
+	 * @param array  options			extra options, server_uri, name and token_ttl
 	 * @exception OAuthException2 when server is not known
 	 * @exception OAuthException2 when we received a duplicate token
 	 */
@@ -661,12 +661,24 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 	 * @param string token
 	 * @param int token_ttl
 	 */
-	public function setServerTokenTtl ( $consumer_key, $token, $token_ttl )
+	public function setServerTokenTtl ( $consumer_key, $token, $token_ttl, $server_uri = NULL )
 	{
 		if ($token_ttl <= 0)
 		{
 			// Immediate delete when the token is past its ttl
 			$this->deleteServerToken($consumer_key, $token, 0, true);
+		}
+		else if ( $server_uri ) 
+		{
+			// Set maximum time to live for this token
+			$this->query('
+						UPDATE oauth_consumer_token, oauth_consumer_registry
+						SET ost_token_ttl = DATE_ADD(NOW(), INTERVAL %d SECOND)
+						WHERE ocr_consumer_key	= \'%s\'
+						  AND ocr_server_uri = \'%s\'
+						  AND oct_ocr_id_ref    = ocr_id
+						  AND oct_token 	    = \'%s\'
+						', $token_ttl, $server_uri, $consumer_key, $token);
 		}
 		else
 		{

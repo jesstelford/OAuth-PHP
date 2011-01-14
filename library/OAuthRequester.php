@@ -126,7 +126,8 @@ class OAuthRequester extends OAuthRequestSigner
 		$token_ttl = $this->getParam('xoauth_token_ttl', false);
 		if (is_numeric($token_ttl))
 		{
-			$this->store->setServerTokenTtl($this->getParam('oauth_consumer_key',true), $this->getParam('oauth_token',true), $token_ttl);
+			$this->store->setServerTokenTtl($this->getParam('oauth_consumer_key',true), $this->getParam('oauth_token',true), 
+				$token_ttl, (isset($options['server_uri']) ? $options['server_uri'] : NULL));
 		}
 
 		return $result;
@@ -194,6 +195,10 @@ class OAuthRequester extends OAuthRequestSigner
 			if (isset($token['xoauth_token_ttl']))
 			{
 				$opts['token_ttl'] = $token['xoauth_token_ttl'];
+			}
+			if (isset($options['server_uri']))
+			{
+				$opts['server_uri'] = $options['server_uri'];
 			}
 			$store->addServerToken($consumer_key, 'request', $token['oauth_token'], $token['oauth_token_secret'], $usr_id, $opts);
 		}
@@ -285,6 +290,10 @@ class OAuthRequester extends OAuthRequestSigner
 			if (isset($token['xoauth_token_ttl']))
 			{
 				$opts['token_ttl'] = $token['xoauth_token_ttl'];
+			}
+			if (isset($options['server_uri']))
+			{
+				$opts['server_uri'] = $options['server_uri'];
 			}
 			$store->addServerToken($consumer_key, 'access', $token['oauth_token'], $token['oauth_token_secret'], $usr_id, $opts);
 		}

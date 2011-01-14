@@ -42,6 +42,7 @@ abstract class OAuthStoreAbstract
 	abstract public function listServerTokens ( $user_id );
 	abstract public function countServerTokens ( $consumer_key );
 	abstract public function getServerToken ( $consumer_key, $token, $user_id );
+	abstract public function setServerTokenTtl ( $consumer_key, $token, $token_ttl, $server_uri = NULL );	
 	abstract public function deleteServerToken ( $consumer_key, $token, $user_id, $user_is_admin = false );
 	abstract public function listServers ( $q = '', $user_id );
 	abstract public function updateServer ( $server, $user_id, $user_is_admin = false );

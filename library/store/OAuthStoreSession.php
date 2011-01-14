@@ -119,7 +119,7 @@ class OAuthStoreSession extends OAuthStoreAbstract
 		// TODO 
 	}
 
-	public function setServerTokenTtl ( $consumer_key, $token, $token_ttl )
+	public function setServerTokenTtl ( $consumer_key, $token, $token_ttl, $server_uri = NULL )
 	{
 		//This method just needs to exist. It doesn't have to do anything!
 	}

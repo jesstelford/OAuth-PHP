@@ -80,7 +80,7 @@ class OAuthStore2Leg extends OAuthStoreAbstract
 	public function countServerTokens ( $consumer_key ) { throw new OAuthException2("OAuthStore2Leg doesn't support " . __METHOD__); }
 	public function getServerToken ( $consumer_key, $token, $user_id ) { throw new OAuthException2("OAuthStore2Leg doesn't support " . __METHOD__); }
 	public function deleteServerToken ( $consumer_key, $token, $user_id, $user_is_admin = false ) { throw new OAuthException2("OAuthStore2Leg doesn't support " . __METHOD__); }
-	public function setServerTokenTtl ( $consumer_key, $token, $token_ttl )
+	public function setServerTokenTtl ( $consumer_key, $token, $token_ttl, $server_uri = NULL )
 	{
 		//This method just needs to exist. It doesn't have to do anything!
 	}
