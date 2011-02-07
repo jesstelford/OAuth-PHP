@@ -1617,6 +1617,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 	 */
 	public function checkServerNonce ( $consumer_key, $token, $timestamp, $nonce )
 	{
+		/* removed in Appendix A of RFC 5849
 		$r = $this->query_row('
 							SELECT MAX(osn_timestamp), MAX(osn_timestamp) > %d + %d
 							FROM oauth_server_nonce
@@ -1627,7 +1628,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 		if (!empty($r) && $r[1])
 		{
 			throw new OAuthException2('Timestamp is out of sequence. Request rejected. Got '.$timestamp.' last max is '.$r[0].' allowed skew is '.$this->max_timestamp_skew);
-		}
+		}*/
 		
 		// Insert the new combination
 		$this->query('

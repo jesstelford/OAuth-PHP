@@ -1622,8 +1622,9 @@ class OAuthStorePostgreSQL extends OAuthStoreAbstract
      */
     public function checkServerNonce ( $consumer_key, $token, $timestamp, $nonce )
     {
+    	/* removed in Appendix A of RFC 5849
         $r = $this->query_row('
-                            SELECT MAX(osn_timestamp), MAX(osn_timestamp) > %d + %d
+                            SELECT MAX(osn_timestamp)
                             FROM oauth_server_nonce
                             WHERE osn_consumer_key = \'%s\'
                               AND osn_token        = \'%s\'
@@ -1633,6 +1634,7 @@ class OAuthStorePostgreSQL extends OAuthStoreAbstract
         {
             throw new OAuthException2('Timestamp is out of sequence. Request rejected. Got '.$timestamp.' last max is '.$r[0].' allowed skew is '.$this->max_timestamp_skew);
         }
+        */
 
         // Insert the new combination
         $this->query('
