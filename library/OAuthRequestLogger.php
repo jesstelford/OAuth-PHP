@@ -281,8 +281,6 @@ class OAuthRequestLogger
 		
 		if (function_exists('apache_request_headers')) {
 			$headers = apache_request_headers();
-			ksort($headers);
-			return $headers;
 		} else {
 			$headers = array_merge($_ENV, $_SERVER);
 			
