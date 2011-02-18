@@ -127,7 +127,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 						  AND osr_enabled		= 1
 						', 
 						$consumer_key);
-			
+
 			if ($rs)
 			{
 				$rs['token'] 		= false;
@@ -326,7 +326,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 						SELECT ocr_id
 						FROM oauth_consumer_registry
 						WHERE ocr_consumer_key = \'%s\'
-						AND ocr_usa_id_ref = %d
+						AND (ocr_usa_id_ref = %d OR ocr_usa_id_ref IS NULL)
 						AND ocr_server_uri = \'%s\'
 						', $consumer_key, $user_id, $options['server_uri']);
 		}
@@ -336,7 +336,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 						SELECT ocr_id
 						FROM oauth_consumer_registry
 						WHERE ocr_consumer_key = \'%s\'
-						AND ocr_usa_id_ref = %d
+						AND (ocr_usa_id_ref = %d OR ocr_usa_id_ref IS NULL)
 						', $consumer_key, $user_id);
 		}
 					
