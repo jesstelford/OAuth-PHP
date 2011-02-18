@@ -80,6 +80,10 @@ class OAuthRequest
 			}
 			if (empty($uri)) {
 				$uri	= $_SERVER->REQUEST_URI->getRawUnsafe();
+				$proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
+				if (strpos($uri, "://") === false) {
+					$uri = sprintf('%s://%s%s', $proto, $_SERVER->HTTP_HOST->getRawUnsafe(), $uri);
+				}
 			}
 		}
 		else
