@@ -11,6 +11,10 @@
 
 # Changes:
 #
+# 2011-02-25
+#           ALTER TABLE oauth_consumer_token MODIFY oct_token varchar(255) binary not null;
+#           ALTER TABLE oauth_consumer_token MODIFY oct_token_secret varchar(255) binary not null;
+#
 # 2010-09-15 
 #			ALTER TABLE oauth_server_token MODIFY ost_referrer_host varchar(128) not null default '';
 #
@@ -124,8 +128,8 @@ CREATE TABLE IF NOT EXISTS oauth_consumer_token (
     oct_ocr_id_ref          int(11) not null,
     oct_usa_id_ref          int(11) not null,
     oct_name                varchar(64) binary not null default '',
-    oct_token               varchar(64) binary not null,
-    oct_token_secret        varchar(64) binary not null,
+    oct_token               varchar(255) binary not null,
+    oct_token_secret        varchar(255) binary not null,
     oct_token_type          enum('request','authorized','access'),
     oct_token_ttl           datetime not null default '9999-12-31',
     oct_timestamp           timestamp not null default current_timestamp,
