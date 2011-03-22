@@ -1205,7 +1205,7 @@ abstract class OAuthStoreSQL extends OAuthStoreAbstract
 	public function addConsumerRequestToken ( $consumer_key, $options = array() )
 	{
 		$token  = $this->generateKey(true);
-		$secret = $this->generateKey();
+		$secret = !isset($options['secret']) ? $this->generateKey() : $options['secret'];
 		$osr_id	= $this->query_one('
 						SELECT osr_id
 						FROM oauth_server_registry

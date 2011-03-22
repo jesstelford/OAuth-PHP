@@ -979,7 +979,7 @@ abstract class OAuthStoreOracle extends OAuthStoreAbstract {
 	public function addConsumerRequestToken ( $consumer_key, $options = array() )
 	{
 		$token  = $this->generateKey(true);
-		$secret = $this->generateKey();
+		$secret = !isset($options['secret']) ? $this->generateKey() : $options['secret'];
 		 
 
 		if (isset($options['token_ttl']) && is_numeric($options['token_ttl']))
